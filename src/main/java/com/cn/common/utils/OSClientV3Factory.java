@@ -61,6 +61,6 @@ public class OSClientV3Factory {
                 .scopeToProject(Identifier.byId("ca2a6d04c5f94f0e8c696f22b1ac5819"))
                 .authenticate();
 //        OSClientV3 os = authenticateUnscoped("http://identity.daocloud.cc/v3","16b24e4f62fd4a70888732b12ace1bda","FQiYa5tlBDJu4C5kqvQPEu4Z5nvfeSYXA1aMltl1");
-        System.out.println(os.identity().projects().list());
+        System.out.println(os.compute().host().list());
     }
 }
