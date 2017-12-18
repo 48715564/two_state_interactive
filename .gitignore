@@ -1,0 +1,5 @@
+.idea/
+two_state_interactive.iml
+application.pid
+application.port
+target/
