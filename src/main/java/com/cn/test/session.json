@@ -1,0 +1,76 @@
+{
+  "response": [
+    {
+      "isOwnSession": false,
+      "id": "1cu57x8690z6bsbk15enxnhoj",
+      "created": "2018-01-18T13:32:55Z",
+      "Address": "192.168.0.2",
+      "authenticationServer": "127.0.0.1",
+      "UserId": "ADMIN",
+      "idleFor": "0",
+      "lastAccessed": "2018-01-18T13:33:35Z"
+    },
+    {
+      "isOwnSession": true,
+      "id": "1r3npdkr0qfd1ixtm34nyxzf9",
+      "created": "2018-01-18T12:00:22Z",
+      "Address": "192.168.0.2",
+      "authenticationServer": "127.0.0.1",
+      "UserId": "ADMIN",
+      "idleFor": "102",
+      "lastAccessed": "2018-01-18T13:43:06Z"
+    },
+    {
+      "isOwnSession": false,
+      "id": "12i66qqd61kep1igsayyktphk5",
+      "created": "2018-01-18T13:29:16Z",
+      "Address": "192.168.0.2",
+      "authenticationServer": "127.0.0.1",
+      "UserId": "ADMIN",
+      "idleFor": "0",
+      "lastAccessed": "2018-01-18T13:29:16Z"
+    },
+    {
+      "isOwnSession": false,
+      "id": "1hqsqhubm52zkewmpvlrk3jqj",
+      "created": "2018-01-18T13:28:07Z",
+      "Address": "192.168.0.2",
+      "authenticationServer": "127.0.0.1",
+      "UserId": "ADMIN",
+      "idleFor": "0",
+      "lastAccessed": "2018-01-18T13:28:07Z"
+    },
+    {
+      "isOwnSession": false,
+      "id": "1epztat4l5c197f5jahi5it1d",
+      "created": "2018-01-18T12:59:25Z",
+      "Address": "192.168.0.2",
+      "authenticationServer": "127.0.0.1",
+      "UserId": "ADMIN",
+      "idleFor": "0",
+      "lastAccessed": "2018-01-18T12:59:25Z"
+    },
+    {
+      "isOwnSession": false,
+      "id": "vgr5sf79r2uqqhpgecicnwey",
+      "created": "2018-01-18T13:35:56Z",
+      "Address": "192.168.0.2",
+      "authenticationServer": "127.0.0.1",
+      "UserId": "ADMIN",
+      "idleFor": "0",
+      "lastAccessed": "2018-01-18T13:35:56Z"
+    }
+  ],
+  "result": "success",
+  "messages": [
+    {
+      "id": "FQXHMSE0001I",
+      "text": "请求已成功完成。",
+      "explanation": "",
+      "recovery": {
+        "text": "仅供参考。无需进行任何操作。",
+        "URL": ""
+      }
+    }
+  ]
+}

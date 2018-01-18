@@ -46,9 +46,9 @@ public class XClarityApi {
         if(jsonObject==null){
             jsonObject = getToken();
         }
-        String crsf = jsonObject.getStr("crsf");
+        String csrf = jsonObject.getJSONObject("response").getJSONObject("session").getStr("csrf");
         HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.add("crsf", crsf);
+        requestHeaders.add("csrf", csrf);
         HttpEntity<String> requestEntity = new HttpEntity<String>(null, requestHeaders);
         return requestEntity;
     }
@@ -65,7 +65,7 @@ public class XClarityApi {
 
     private JSONObject getToken() {
         JSONObject json = JSONUtil.createObj();
-        json.put("userId",userId);
+        json.put("UserId",userId);
         json.put("password",password);
         String apiUrl = apiHost+session;
         JSONObject jsonObject = restTemplate.postForEntity(apiUrl,json,JSONObject.class).getBody();
