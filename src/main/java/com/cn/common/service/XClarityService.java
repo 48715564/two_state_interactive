@@ -1,6 +1,5 @@
 package com.cn.common.service;
 
-import com.cn.common.utils.OSClientV3Factory;
 import com.cn.common.utils.XClarityApi;
 import com.cn.page.AjaxResponse;
 import com.google.common.collect.Lists;
@@ -9,17 +8,14 @@ import com.xiaoleilu.hutool.json.JSONArray;
 import com.xiaoleilu.hutool.json.JSONObject;
 import com.xiaoleilu.hutool.util.NumberUtil;
 import org.apache.commons.lang.StringUtils;
-import org.jclouds.json.Json;
-import org.openstack4j.api.OSClient.OSClientV3;
-import org.openstack4j.model.telemetry.Statistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
-
-import static org.apache.coyote.http11.Constants.a;
 
 /**
  * Created by bozhou on 2017/12/18.
@@ -35,7 +31,7 @@ public class XClarityService{
         JSONObject tempData = data.getJSONObject("response");
         AjaxResponse ajaxResponse = new AjaxResponse();
         if ("success".equals(data.getStr("result"))) {
-            Integer kbToGb = 1024 * 1024 * 1024;
+            BigDecimal kbToGb = BigDecimal.valueOf(1024 * 1024 * 1024);
             //NumberOfProcessors is actually number of cores. Its bad naming.
             JSONObject processor = new JSONObject();
             processor.put("Resource","processor");
@@ -44,20 +40,20 @@ public class XClarityService{
 
 
             JSONObject ram = new JSONObject();
-            Integer MemTotal= tempData.getInt("MemTotal");
-            Integer MemAvailable = tempData.getInt("MemAvailable");
+            BigDecimal MemTotal= tempData.getBigDecimal("MemTotal");
+            BigDecimal MemAvailable = tempData.getBigDecimal("MemAvailable");
             ram.put("Resource","ram");
-            ram.put("Utilization",NumberUtil.mul(NumberUtil.div(String.valueOf(MemTotal-MemAvailable),String.valueOf(MemTotal)),100).intValue());
-            ram.put("FlatUtil",NumberUtil.round(NumberUtil.div(String.valueOf(MemTotal-MemAvailable),kbToGb.toString()).doubleValue(),2, RoundingMode.DOWN));
-            ram.put("Maximum",NumberUtil.round(NumberUtil.div(MemTotal.doubleValue(),kbToGb.doubleValue()),2,RoundingMode.DOWN));
+            ram.put("Utilization",NumberUtil.mul(NumberUtil.div(NumberUtil.sub(MemTotal,MemAvailable),MemTotal),100).intValue());
+            ram.put("FlatUtil",NumberUtil.round(NumberUtil.div(NumberUtil.sub(MemTotal,MemAvailable),kbToGb).doubleValue(),2));
+            ram.put("Maximum",NumberUtil.round(NumberUtil.div(MemTotal,kbToGb).doubleValue(),2));
 
             JSONObject hdd = new JSONObject();
-            Integer sda1PartitionTotal= tempData.getInt("sda1PartitionTotal");
-            Integer sda1PartitionAvailable = tempData.getInt("sda1PartitionAvailable");
-            hdd.put("Resource","ram");
-            hdd.put("Utilization",NumberUtil.div(String.valueOf((sda1PartitionTotal-sda1PartitionAvailable)*100),String.valueOf(sda1PartitionTotal)).intValue());
-            hdd.put("FlatUtil",NumberUtil.round(NumberUtil.div(String.valueOf(sda1PartitionTotal-sda1PartitionAvailable),kbToGb.toString()).doubleValue(),2, RoundingMode.DOWN));
-            hdd.put("Maximum",NumberUtil.round(NumberUtil.div(sda1PartitionTotal.doubleValue(),kbToGb.doubleValue()),2,RoundingMode.DOWN));
+            BigDecimal sda1PartitionTotal= tempData.getBigDecimal("sda1PartitionTotal");
+            BigDecimal sda1PartitionAvailable = tempData.getBigDecimal("sda1PartitionAvailable");
+            hdd.put("Resource","hdd");
+            hdd.put("Utilization",NumberUtil.div(NumberUtil.mul(NumberUtil.sub(sda1PartitionTotal,sda1PartitionAvailable),100),sda1PartitionTotal).intValue());
+            hdd.put("FlatUtil",NumberUtil.round(NumberUtil.div(NumberUtil.sub(sda1PartitionTotal,sda1PartitionAvailable),kbToGb).doubleValue(),2));
+            hdd.put("Maximum",NumberUtil.round(NumberUtil.div(sda1PartitionTotal,kbToGb).doubleValue(),2));
 
             newData.add(processor);
             newData.add(ram);
@@ -172,8 +168,8 @@ public class XClarityService{
         JSONObject serverStore = getCount(dataMap.get("serverMemoryStore"),"server");
         JSONObject storageStore = getCount(dataMap.get("storageMemoryStore"),"storage");
         JSONObject switchStore = getCount(dataMap.get("switchMemoryStore"),"switch");
-        JSONObject chassisStore = getCount(dataMap.get("serverMemoryStore"),"chassis");
-        JSONObject rackStore = getCount(dataMap.get("serverMemoryStore"),"rack");
+        JSONObject chassisStore = getCount(dataMap.get("chassisMemoryStore"),"chassis");
+        JSONObject rackStore = getCount(dataMap.get("rackMemoryStore"),"rack");
         JSONArray jsonArray = new JSONArray();
         jsonArray.add(serverStore);
         jsonArray.add(storageStore);

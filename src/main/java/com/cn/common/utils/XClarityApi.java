@@ -34,7 +34,7 @@ public class XClarityApi {
     private static final String session = "/sessions";
     private static final String cabinet = "/cabinet";
     private static final String fuelGauge = "/fuelGauge";
-    private static final String task = "/task";
+    private static final String task = "/tasks";
     private static final String updateMetrics="/stgupdates/inventory/updateMetrics";
     private static final String osImages="/osImages";
     private static final String hostPlatformsDeployStatus="/hostPlatforms/deploy/status";

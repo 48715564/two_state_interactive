@@ -83,7 +83,7 @@ public class XClarityController {
 
     @ApiOperation(value = "sessions信息", notes = "sessions信息", position = 1)
     @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
-    @GetMapping("/jobs")
+    @GetMapping("/sessions")
     public AjaxResponse<JSONArray> sessions(){
         try {
             return xClarityService.sessions();
