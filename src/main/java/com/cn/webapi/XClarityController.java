@@ -92,6 +92,32 @@ public class XClarityController {
         }
     }
 
+    /**
+     *
+     *  if (data[i].Utilization <= data[i].Maximum / 4) {
+         labelCPU = nls.veryLow;
+         color = '#17af4b';
+         } else if (data[i].Utilization <= data[i].Maximum / 2) {
+         labelCPU = nls.low;
+         color = '#75a536';
+         } else if (data[i].Utilization <= data[i].Maximum) {
+         labelCPU = nls.medium;
+         color = '#838329';
+         } else if (data[i].Utilization <= data[i].Maximum * 2) {
+         labelCPU = nls.high;
+         color = '#dd731c';
+         } else {
+         labelCPU = nls.veryHigh;
+         color = '#f04e37';
+         }
+         data[i].Maximum += " " + nls.cores;
+         data[i].Utilization = "<span style='color:" + color + "'>" + labelCPU + "</span>";
+     }
+     *
+     *
+     *
+     * @return
+     */
     @ApiOperation(value = "sysResources信息", notes = "sysResources信息", position = 1)
     @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
     @GetMapping("/sysResources")
