@@ -2,10 +2,12 @@ package com.cn.common.service;
 
 import com.cn.common.utils.OSClientV3Factory;
 import com.cn.common.utils.XClarityApi;
+import com.cn.page.AjaxResponse;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.xiaoleilu.hutool.json.JSONArray;
 import com.xiaoleilu.hutool.json.JSONObject;
+import com.xiaoleilu.hutool.util.NumberUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jclouds.json.Json;
 import org.openstack4j.api.OSClient.OSClientV3;
@@ -13,6 +15,7 @@ import org.openstack4j.model.telemetry.Statistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
@@ -22,41 +25,162 @@ import static org.apache.coyote.http11.Constants.a;
  * Created by bozhou on 2017/12/18.
  */
 @Service
-public class XClarityService {
+public class XClarityService{
     @Autowired
     XClarityApi xClarityApi;
 
-    private Map<String, JSONObject> serverMemoryStore = Maps.newHashMap(); //服务器
-    private Map<String, JSONObject> storageMemoryStore = Maps.newHashMap();//存储
-    private Map<String, JSONObject> switchMemoryStore = Maps.newHashMap();//交换机
-    private Map<String, JSONObject> chassisMemoryStore = Maps.newHashMap();//机箱
-    private Map<String, JSONObject> complexMemoryStore = Maps.newHashMap();
-    private Map<String, JSONObject> rackMemoryStore = Maps.newHashMap();//机架
+    public AjaxResponse<JSONArray> sysResources(){
+        JSONObject data = xClarityApi.fuelGaugeApi();
+        JSONArray newData = new JSONArray();
+        JSONObject tempData = data.getJSONObject("response");
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        if ("success".equals(data.getStr("result"))) {
+            Integer kbToGb = 1024 * 1024 * 1024;
+            //NumberOfProcessors is actually number of cores. Its bad naming.
+            JSONObject processor = new JSONObject();
+            processor.put("Resource","processor");
+            processor.put("Utilization",tempData.getInt("LoadAvg1Min"));
+            processor.put("Maximum",tempData.getStr("numberOfWorkingProcessors"));
+
+
+            JSONObject ram = new JSONObject();
+            Integer MemTotal= tempData.getInt("MemTotal");
+            Integer MemAvailable = tempData.getInt("MemAvailable");
+            ram.put("Resource","ram");
+            ram.put("Utilization",NumberUtil.mul(NumberUtil.div(String.valueOf(MemTotal-MemAvailable),String.valueOf(MemTotal)),100).intValue());
+            ram.put("FlatUtil",NumberUtil.round(NumberUtil.div(String.valueOf(MemTotal-MemAvailable),kbToGb.toString()).doubleValue(),2, RoundingMode.DOWN));
+            ram.put("Maximum",NumberUtil.round(NumberUtil.div(MemTotal.doubleValue(),kbToGb.doubleValue()),2,RoundingMode.DOWN));
+
+            JSONObject hdd = new JSONObject();
+            Integer sda1PartitionTotal= tempData.getInt("sda1PartitionTotal");
+            Integer sda1PartitionAvailable = tempData.getInt("sda1PartitionAvailable");
+            hdd.put("Resource","ram");
+            hdd.put("Utilization",NumberUtil.div(String.valueOf((sda1PartitionTotal-sda1PartitionAvailable)*100),String.valueOf(sda1PartitionTotal)).intValue());
+            hdd.put("FlatUtil",NumberUtil.round(NumberUtil.div(String.valueOf(sda1PartitionTotal-sda1PartitionAvailable),kbToGb.toString()).doubleValue(),2, RoundingMode.DOWN));
+            hdd.put("Maximum",NumberUtil.round(NumberUtil.div(sda1PartitionTotal.doubleValue(),kbToGb.doubleValue()),2,RoundingMode.DOWN));
+
+            newData.add(processor);
+            newData.add(ram);
+            newData.add(hdd);
+        }
+        else {
+            ajaxResponse.setSuccess(false);
+            ajaxResponse.setErrorCode("400");
+        }
+        ajaxResponse.setResult(newData);
+        return ajaxResponse;
+    }
+
+    public AjaxResponse<JSONArray> sessions(){
+        JSONObject data = xClarityApi.sessionsApi();
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        JSONArray newData = data.getJSONArray("response");
+        ajaxResponse.setResult(newData);
+        return ajaxResponse;
+    }
+
+    public AjaxResponse<JSONObject> jobs(){
+        JSONArray jsonArray = xClarityApi.taskApi();
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        JSONObject newData = new JSONObject();
+        int jobsCount = 0;
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
+            if (!jsonObject.getBool("isDeletable"))
+                jobsCount++;
+        }
+        newData.put("jobsCount",jobsCount);
+        ajaxResponse.setResult(newData);
+        return ajaxResponse;
+    }
+
+
+    public AjaxResponse<JSONObject> firmwares(){
+        JSONObject data = xClarityApi.updateMetricsApi();
+        for(Map.Entry<String, Object> entry:data.entrySet()){
+            if(entry.getValue() instanceof Integer){
+                Integer value = (Integer) entry.getValue();
+                if(value<0){
+                    entry.setValue(0);
+                }
+            }
+        }
+        JSONObject newData = new JSONObject();
+        newData.put("compliantDevicesCount",data.getInt("devicesCompliant"));
+        newData.put("noncompliantDevicesCount",data.getInt("devicesNonCompliant"));
+        newData.put("notSetCompliancePolicyCount",data.getInt("devicesNonPolicy"));
+        newData.put("updatesInProgressCount",data.getInt("numOfUpdatesinProgress"));
+        return new AjaxResponse(newData);
+    }
+
+    public AjaxResponse<JSONObject> systemImages(){
+        JSONObject images = xClarityApi.osImagesApi();
+        JSONObject jobs = xClarityApi.hostPlatformsDeployStatusApi();
+        JSONObject newData = new JSONObject();
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        if (!"success".equals(images.getStr("result"))|| !"success".equals(jobs.getStr("result"))) {
+            newData.put("osImages",images);
+            newData.put("osJobs",jobs);
+            ajaxResponse.setSuccess(false);
+            ajaxResponse.setErrorCode("400");
+        } else {
+            // Process the data into the data needed for the dashboard category
+            newData.put("availableOSImagesCount",images.getInt("number")!=null?images.getInt("number"):0);
+            newData.put("deploysInProgressCount",jobs.getInt("number")!=null?jobs.getInt("number"):0);
+        }
+
+        ajaxResponse.setResult(newData);
+        return ajaxResponse;
+    }
+
+
+    public AjaxResponse<JSONObject> configPatterns(){
+        JSONObject status = xClarityApi.configDeployStatusApi();
+        JSONObject profile = xClarityApi.configProfileApi();
+        JSONObject newData = new JSONObject();
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        if (status.containsKey("computeNodes")&& profile.containsKey("items")) {
+            // Process the data into the data needed for the dashboard category
+            Integer noAssignedPatternsCount = status.getInt("unassignedComputeNodes")!=null?status.getInt("unassignedComputeNodes"):0;
+            newData.put("withoutAssignedPatternsCount",noAssignedPatternsCount);
+            Integer assignedPatternsCount = status.getInt("computeNodes")!=null?(status.getInt("computeNodes")-noAssignedPatternsCount):0;
+            newData.put("withAssignedPatternsCount",assignedPatternsCount);
+            JSONArray jsonArray = profile.getJSONArray("items");
+            int deploysInProgressCount = 0;
+            for(Object object:jsonArray){
+                JSONObject jsonObject = (JSONObject) object;
+                if("ACTIVATING".equals(jsonObject.getStr("profileStatus"))){
+                    deploysInProgressCount++;
+                }
+            }
+            newData.put("deploysInProgressCount",deploysInProgressCount);
+        }else{
+            ajaxResponse.setSuccess(false);
+            ajaxResponse.setErrorCode("400");
+        }
+        ajaxResponse.setResult(newData);
+        return ajaxResponse;
+    }
 
     /**
-     *  reportData.critical = dataStore.query({_statusIndex: 0}).length;
-     reportData.warning = dataStore.query({_statusIndex: 1}).length;
-     reportData.offline = dataStore.query({_statusIndex: 2}).length;
-     reportData.unknown = dataStore.query({_statusIndex: 3}).length;
-     reportData.pending = dataStore.query({_statusIndex: 4}).length;
-     reportData.ok = dataStore.query({_statusIndex: 6}).length;
+     * 查询硬件状态
      * @return
      */
-    public JSONArray hardwareList(){
-        _onFinishInitializeInventory(xClarityApi.cabinetApi());
+    public AjaxResponse<JSONArray> hardwareList(){
+        Map<String,Map<String, JSONObject>> dataMap = _onFinishInitializeInventory(xClarityApi.cabinetApi());
         //根据状态查询数量
-        JSONObject serverStore = getCount(serverMemoryStore,"server");
-        JSONObject storageStore = getCount(storageMemoryStore,"storage");
-        JSONObject switchStore = getCount(switchMemoryStore,"switch");
-        JSONObject chassisStore = getCount(serverMemoryStore,"chassis");
-        JSONObject rackStore = getCount(serverMemoryStore,"rack");
+        JSONObject serverStore = getCount(dataMap.get("serverMemoryStore"),"server");
+        JSONObject storageStore = getCount(dataMap.get("storageMemoryStore"),"storage");
+        JSONObject switchStore = getCount(dataMap.get("switchMemoryStore"),"switch");
+        JSONObject chassisStore = getCount(dataMap.get("serverMemoryStore"),"chassis");
+        JSONObject rackStore = getCount(dataMap.get("serverMemoryStore"),"rack");
         JSONArray jsonArray = new JSONArray();
         jsonArray.add(serverStore);
         jsonArray.add(storageStore);
         jsonArray.add(switchStore);
         jsonArray.add(chassisStore);
         jsonArray.add(rackStore);
-        return jsonArray;
+        return new AjaxResponse<>(jsonArray);
     }
 
     private JSONObject getCount(Map<String, JSONObject> data,String name){
@@ -92,7 +216,13 @@ public class XClarityService {
         return jsonObject;
     }
 
-    public void _onFinishInitializeInventory(JSONObject jsonObject) {
+    public Map<String,Map<String, JSONObject>> _onFinishInitializeInventory(JSONObject jsonObject) {
+        Map<String, JSONObject> serverMemoryStore = Maps.newHashMap(); //服务器
+        Map<String, JSONObject> storageMemoryStore = Maps.newHashMap();//存储
+        Map<String, JSONObject> switchMemoryStore = Maps.newHashMap();//交换机
+        Map<String, JSONObject> chassisMemoryStore = Maps.newHashMap();//机箱
+        Map<String, JSONObject> complexMemoryStore = Maps.newHashMap();
+        Map<String, JSONObject> rackMemoryStore = Maps.newHashMap();//机架
         int b, c, d, e;
         JSONArray jsonArray = jsonObject.getJSONArray("cabinetList");
         for (b = 0; b < jsonArray.size(); b++) {
@@ -135,14 +265,22 @@ public class XClarityService {
                 _processRackStorage(storageMemoryStore, cabinetNode, d);
             }
             if (!"STANDALONE_OBJECT_UUID".equals(cabinetNode.getStr("UUID"))) {
-                _processRack(rackMemoryStore, cabinetNode);
+                _processRack(serverMemoryStore,switchMemoryStore,rackMemoryStore, cabinetNode);
             }
         }
+        Map<String,Map<String, JSONObject>> mapMap = Maps.newHashMap();
+        mapMap.put("serverMemoryStore",serverMemoryStore);
+        mapMap.put("storageMemoryStore",storageMemoryStore);
+        mapMap.put("switchMemoryStore",switchMemoryStore);
+        mapMap.put("chassisMemoryStore",chassisMemoryStore);
+        mapMap.put("complexMemoryStore",complexMemoryStore);
+        mapMap.put("rackMemoryStore",rackMemoryStore);
+        return mapMap;
     }
 
-    private void _processRack(Map<String, JSONObject> dataMap, JSONObject a) {
+    private void _processRack(Map<String, JSONObject> serverMemoryStore,Map<String, JSONObject> switchMemoryStore,Map<String, JSONObject> dataMap, JSONObject a) {
         a.put("name", a.getStr("cabinetName"));
-        a.put("_statusIndex", getCabinetStatusIndex(dataMap,a));
+        a.put("_statusIndex", getCabinetStatusIndex(serverMemoryStore,switchMemoryStore,dataMap,a));
         dataMap.put(a.getStr("UUID"), a);
 
     }
@@ -162,7 +300,7 @@ public class XClarityService {
         return rackChassis;
     }
 
-    private List<JSONObject> getRackServersInRack(JSONObject rackItem) {
+    private List<JSONObject> getRackServersInRack(Map<String, JSONObject> serverMemoryStore,JSONObject rackItem) {
         List<JSONObject> rackServers = Lists.newArrayList();
         JSONArray nodeList = rackItem.getJSONArray("nodeList");
         if (nodeList!=null && nodeList.size() > 0) {
@@ -176,7 +314,7 @@ public class XClarityService {
         return rackServers;
     }
 
-    private List<JSONObject> getRackSwitchesInRack(JSONObject rackItem) {
+    private List<JSONObject> getRackSwitchesInRack(Map<String, JSONObject> switchMemoryStore,JSONObject rackItem) {
         List<JSONObject> rackSwitches = Lists.newArrayList();
         JSONArray switchList = rackItem.getJSONArray("switchList");
         if (switchList!=null && switchList.size() > 0) {
@@ -190,17 +328,17 @@ public class XClarityService {
         return rackSwitches;
     }
     //todo
-    private int getCabinetStatusIndex(Map<String, JSONObject> dataMap,JSONObject cabinetObj) {
+    private int getCabinetStatusIndex(Map<String, JSONObject> serverMemoryStore,Map<String, JSONObject> switchMemoryStore,Map<String, JSONObject> dataMap,JSONObject cabinetObj) {
         List<JSONObject> componentList = Lists.newArrayList();
         List<JSONObject> chassisList = getChassisInRack(dataMap,cabinetObj);
         for ( int i = 0; i < chassisList.size(); i++) { //for ( var i in chassisList) {
             componentList.add(chassisList.get(i));
         }
-        List<JSONObject> serverList = getRackServersInRack(cabinetObj);
+        List<JSONObject> serverList = getRackServersInRack(serverMemoryStore,cabinetObj);
         for (int i = 0; i < serverList.size(); i++) {//i in serverList) {
             componentList.add(serverList.get(i));
         }
-        List<JSONObject> switchList = getRackSwitchesInRack(cabinetObj);
+        List<JSONObject> switchList = getRackSwitchesInRack(switchMemoryStore,cabinetObj);
         for (int i = 0; i < switchList.size(); i++) {//i in switchList) {
             componentList.add(switchList.get(i));
         }
