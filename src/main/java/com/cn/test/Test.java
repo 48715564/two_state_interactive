@@ -1,14 +1,5 @@
 package com.cn.test;
 
-import com.cn.common.service.XClarityService;
-import com.xiaoleilu.hutool.http.HttpUtil;
-import com.xiaoleilu.hutool.json.JSONArray;
-import com.xiaoleilu.hutool.json.JSONObject;
-import com.xiaoleilu.hutool.json.JSONUtil;
-import com.xiaoleilu.hutool.util.NumberUtil;
-
-import java.math.RoundingMode;
-
 /**
  * Created by bozhou on 2018/1/18.
  */

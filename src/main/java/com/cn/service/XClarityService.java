@@ -1,4 +1,4 @@
-package com.cn.common.service;
+package com.cn.service;
 
 import com.cn.common.utils.XClarityApi;
 import com.cn.page.AjaxResponse;
