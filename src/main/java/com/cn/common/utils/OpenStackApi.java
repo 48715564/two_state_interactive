@@ -20,19 +20,39 @@ public class OpenStackApi {
     private String password;
     @Value("${OpenStack.identity3Url}")
     private String apiHost;
+    @Autowired
+    private Provider provider;
+    private ThreadLocal<Cache<String,OSClientV3>> threadLocal = new ThreadLocal<>();
+
 
     public OSClientV3 getAuthenticateUnscoped(){
-        return OSClientV3Factory.authenticateUnscoped(apiHost, userId, password);
+        if(threadLocal.get()==null||threadLocal.get().get("unscoped")==null) {
+            OSClientV3 osClientV3 = OSClientV3Factory.authenticateUnscoped(apiHost, userId, password);
+            Long timeOut = osClientV3.getToken().getExpires().getTime()-provider.now().getTime();
+            Cache<String,OSClientV3> fifoCache = CacheUtil.newTimedCache(timeOut-10000);
+            fifoCache.put("unscoped",osClientV3);
+            threadLocal.set(fifoCache);
+            return osClientV3;
+        }else {
+            OSClientV3 osClientV3 = threadLocal.get().get("unscoped");
+            return osClientV3;
+        }
     }
 
     public OSClientV3 getAuthenticateWithProjectScope(String projectId){
         OSClientV3 authenticateUnscoped = getAuthenticateUnscoped();
+        Cache<String,OSClientV3> fifoCache = threadLocal.get();
+        if(fifoCache.get(projectId)==null) {
             for (Project project : authenticateUnscoped.identity().projects().list()) {
                 if (projectId.equals(project.getId())) {
                     OSClientV3 osClientV3 = OSClientV3Factory.authenticateWithProjectScope(apiHost, authenticateUnscoped.getToken().getUser().getName(), password, project.getDomainId(), project.getId());
+                    fifoCache.put(projectId, osClientV3);
                     return osClientV3;
                 }
+            }
+            throw new ResponseException("没有找到对应的project", org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
+        }else{
+            return fifoCache.get(projectId);
         }
-        throw new ResponseException("没有找到对应的project", org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
