@@ -20,10 +20,12 @@ public class OpenStackApi {
     private String password;
     @Value("${OpenStack.identity3Url}")
     private String apiHost;
-
+    private OSClientV3 osClientV3;
 
     public OSClientV3 getAuthenticateUnscoped(){
-        return OSClientV3Factory.authenticateUnscoped(apiHost, userId, password);
+        if(osClientV3 == null)
+            osClientV3 = OSClientV3Factory.authenticateUnscoped(apiHost, userId, password);
+        return osClientV3;
     }
 
     public OSClientV3 getAuthenticateWithProjectScope(String projectId){

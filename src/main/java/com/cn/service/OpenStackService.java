@@ -5,6 +5,7 @@ import com.cn.domain.entity.BusOpenstackLogs;
 import com.cn.domain.entity.BusOpenstackLogsExample;
 import com.cn.page.AjaxResponse;
 import com.github.pagehelper.PageInfo;
+import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.ext.HypervisorStatistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,8 @@ public class OpenStackService {
 
     public AjaxResponse<BusOpenstackLogs> getInfo(){
         BusOpenstackLogs jsonObject = new BusOpenstackLogs();
-        HypervisorStatistics hypervisorStatistics =openStackApi.getAuthenticateUnscoped().compute().hypervisors().statistics();
+        OSClient.OSClientV3 osClientV3 = openStackApi.getAuthenticateUnscoped();
+        HypervisorStatistics hypervisorStatistics =osClientV3.compute().hypervisors().statistics();
         jsonObject.setHypervisorCount(hypervisorStatistics.getCount());
         jsonObject.setRunningVmCount(hypervisorStatistics.getRunningVM());
         jsonObject.setDiskAvailableLeast(hypervisorStatistics.getLeastAvailableDisk());
@@ -38,7 +40,7 @@ public class OpenStackService {
         jsonObject.setVirtualUsedCpu(hypervisorStatistics.getVirtualUsedCPU());
 
         //网络个数
-        Integer netWordCount = openStackApi.getAuthenticateUnscoped().networking().network().list().size();
+        Integer netWordCount = osClientV3.networking().network().list().size();
         jsonObject.setNetworkCount(netWordCount);
         jsonObject.setCreateTm(new Date());
         return new AjaxResponse(jsonObject);
