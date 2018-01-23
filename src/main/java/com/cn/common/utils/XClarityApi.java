@@ -27,6 +27,8 @@ public class XClarityApi {
     private String password;
     @Value("${XClarity.apiHost}")
     private String apiHost;
+    @Value("${XClarity.sessionExpiresTime}")
+    private Long sessionExpiresTime;
     @Autowired
     private RestTemplate restTemplate;
     Cache<String,JSONObject> fifoCache = CacheUtil.newFIFOCache(1);
@@ -69,7 +71,7 @@ public class XClarityApi {
         json.put("password",password);
         String apiUrl = apiHost+session;
         JSONObject jsonObject = restTemplate.postForEntity(apiUrl,json,JSONObject.class).getBody();
-        fifoCache.put("userToken",jsonObject);
+        fifoCache.put("userToken",jsonObject,sessionExpiresTime);
         return jsonObject;
     }
 
