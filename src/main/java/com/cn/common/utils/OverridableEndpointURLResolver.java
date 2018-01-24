@@ -108,7 +108,7 @@ public class OverridableEndpointURLResolver implements EndpointURLResolver {
 		// try use override endpoint first
 		String endpoint = overrides.get(p.type);
 		if (endpoint != null) {
-			url = endpoint.replace("%(project_id)s", p.token.getProject().getId());
+			url = endpoint;
 		} else {
 			url = resolveV3(p);
 		}
