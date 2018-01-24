@@ -1,6 +1,7 @@
 package com.cn.common.utils;
 
 import org.openstack4j.api.OSClient.*;
+import org.openstack4j.api.types.ServiceType;
 import org.openstack4j.model.common.Identifier;
 import org.openstack4j.model.identity.v3.Endpoint;
 import org.openstack4j.openstack.OSFactory;
@@ -52,6 +53,15 @@ public class OSClientV3Factory {
     }
 
     public static void main(String[] args) {
+        // 添加各个服务的endpoint绑定
+//        OverridableEndpointURLResolver endpointResolver = new OverridableEndpointURLResolver();
+//
+//        endpointResolver.addOverrideEndpoint(ServiceType.COMPUTE,
+//                "https://vbs.example.com/v2/%(project_id)s");
+//
+//        endpointResolver.addOverrideEndpoint(ServiceType.IMAGE,
+//                "https://as.example.com/autoscaling-api/v1/%(project_id)s");
+
 //        System.out.println(Identifier.byName("default").toString());
 //        OSClientV3 os = OSFactory.builderV3()
 //                .endpoint("http://identity.daocloud.cc/v3")
