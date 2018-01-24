@@ -2,9 +2,12 @@ package com.cn.common.utils;
 
 import org.openstack4j.api.OSClient.*;
 import org.openstack4j.model.common.Identifier;
+import org.openstack4j.model.identity.v3.Endpoint;
 import org.openstack4j.openstack.OSFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Created by bozhou on 2017/12/18.
@@ -60,6 +63,10 @@ public class OSClientV3Factory {
                 .credentials("admin", "FQiYa5tlBDJu4C5kqvQPEu4Z5nvfeSYXA1aMltl1", Identifier.byId("default"))
                 .scopeToProject(Identifier.byId("ca2a6d04c5f94f0e8c696f22b1ac5819"))
                 .authenticate();
+//        List<? extends Endpoint> endpointList = os.identity().serviceEndpoints().listEndpoints();
+//        endpointList.forEach(item->{
+//
+//        });
 //        OSClientV3 os = authenticateUnscoped("http://identity.daocloud.cc/v3","16b24e4f62fd4a70888732b12ace1bda","FQiYa5tlBDJu4C5kqvQPEu4Z5nvfeSYXA1aMltl1");
         System.out.println(os.compute().host().list());
     }
