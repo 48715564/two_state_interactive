@@ -6,6 +6,8 @@ import com.cn.service.OpenStackService;
 import com.cn.page.AjaxResponse;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/OpenStack")
 public class OpenStackController {
+    private static final Logger logger = LoggerFactory.getLogger(OpenStackController.class);
     @Autowired
     private OpenStackService openStackService;
 
@@ -28,6 +31,7 @@ public class OpenStackController {
         try {
             return openStackService.getInfo();
         }catch (Exception e){
+            logger.error(e.getMessage());
             throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -41,6 +45,7 @@ public class OpenStackController {
         try {
             return openStackService.getInfoByPage(page, limit);
         }catch (Exception e){
+            logger.error(e.getMessage());
             throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
