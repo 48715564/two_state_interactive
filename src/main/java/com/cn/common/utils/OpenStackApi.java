@@ -97,7 +97,7 @@ public class OpenStackApi {
     }
 
 
-    public OpenStackApi(){
+    private void getEndpointResolver(){
         if(endpointResolver==null){
             endpointResolver = new OverridableEndpointURLResolver();
             if(StringUtils.isNotBlank(applicationCatalog)){
@@ -167,6 +167,7 @@ public class OpenStackApi {
     }
 
     public OSClientV3 getAuthenticateUnscoped(){
+        getEndpointResolver();
         if(threadLocal.get()==null||threadLocal.get().get("unscoped")==null) {
             OSClientV3 osClientV3 = null;
             if(endpointResolver!=null&&!endpointResolver.getOverrides().isEmpty()) {
