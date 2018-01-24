@@ -17,6 +17,43 @@ import java.util.List;
 @Component
 public class OSClientV3Factory {
 
+    public static OSClientV3 authenticateUnscoped(OverridableEndpointURLResolver endpointResolver,String endpoint,String user_id, String secret){
+        OSClientV3 os = OSFactory.builderV3()
+                .endpoint(endpoint)
+                .credentials(user_id, secret)
+                .authenticate();
+        return os;
+    }
+
+    public static OSClientV3 authenticateWithProjectScope(OverridableEndpointURLResolver endpointResolver,String endpoint,String user_id, String secret,String user_domain_id,String project_id){
+        OSClientV3 os = OSFactory.builderV3()
+                .endpoint(endpoint)
+                .credentials(user_id, secret, Identifier.byId(user_domain_id))
+                .scopeToProject(Identifier.byId(project_id))
+                .authenticate();
+        return os;
+    }
+
+
+    public static OSClientV3 authenticateWithDomainScope(OverridableEndpointURLResolver endpointResolver,String endpoint,String user_id, String secret,String user_domain_id,String domain_id){
+        OSClientV3 os = OSFactory.builderV3()
+                .endpoint(endpoint)
+                .credentials(user_id, secret, Identifier.byId(user_domain_id))
+                .scopeToDomain(Identifier.byId(domain_id))
+                .authenticate();
+        return os;
+    }
+
+    public static OSClientV3 authenticateWithAToken(OverridableEndpointURLResolver endpointResolver,String endpoint,String token_id, String project_id){
+        OSClientV3 os = OSFactory.builderV3()
+                .endpoint(endpoint)
+                .token(token_id)
+                .scopeToProject(Identifier.byId(project_id))
+                .authenticate();
+        return os;
+    }
+
+
     public static OSClientV3 authenticateUnscoped(String endpoint,String user_id, String secret){
         OSClientV3 os = OSFactory.builderV3()
                 .endpoint(endpoint)
@@ -80,6 +117,6 @@ public class OSClientV3Factory {
 //
 //        });
 //        OSClientV3 os = authenticateUnscoped("http://identity.daocloud.cc/v3","16b24e4f62fd4a70888732b12ace1bda","FQiYa5tlBDJu4C5kqvQPEu4Z5nvfeSYXA1aMltl1");
-        System.out.println(os.compute().host().list());
+        System.out.println(endpointResolver.getOverrides().isEmpty());
     }
 }
