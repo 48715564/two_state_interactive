@@ -6,6 +6,8 @@ import com.cn.page.AjaxResponse;
 import com.xiaoleilu.hutool.json.JSONArray;
 import com.xiaoleilu.hutool.json.JSONObject;
 import io.swagger.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class XClarityController {
     @Autowired
     private XClarityService xClarityService;
+    private static final Logger logger = LoggerFactory.getLogger(OpenStackController.class);
 
     @ApiOperation(value = "获取硬件信息", notes = "获取硬件信息", position = 1)
     @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
@@ -31,6 +34,7 @@ public class XClarityController {
         try {
             return xClarityService.hardwareList();
         }catch (Exception e){
+            logger.error(e.getMessage());
             throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -42,6 +46,7 @@ public class XClarityController {
         try {
             return xClarityService.configPatterns();
         }catch (Exception e){
+            logger.error(e.getMessage());
             throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -53,6 +58,7 @@ public class XClarityController {
         try {
             return xClarityService.systemImages();
         }catch (Exception e){
+            logger.error(e.getMessage());
             throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -64,6 +70,7 @@ public class XClarityController {
         try {
             return xClarityService.firmwares();
         }catch (Exception e){
+            logger.error(e.getMessage());
             throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -75,6 +82,7 @@ public class XClarityController {
         try {
             return xClarityService.jobs();
         }catch (Exception e){
+            logger.error(e.getMessage());
             throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -86,6 +94,7 @@ public class XClarityController {
         try {
             return xClarityService.sessions();
         }catch (Exception e){
+            logger.error(e.getMessage());
             throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -123,6 +132,7 @@ public class XClarityController {
         try {
             return xClarityService.sysResources();
         }catch (Exception e){
+            logger.error(e.getMessage());
             throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
