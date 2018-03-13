@@ -88,7 +88,7 @@ public class AuthenticationRestController {
     }
 
     //检测token是否失效
-    @ApiOperation(value = "用户token刷新", notes = "用户token刷新。", position = 1)
+    @ApiOperation(value = "检测token是否失效", notes = "检测token是否失效。", position = 1)
     @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
     @RequestMapping(value = "isTokenExpired", method = RequestMethod.POST)
     public AjaxResponse<?> isTokenExpired( @ApiParam(value = "用户token", required = true) @RequestParam(required = true) String token) {
