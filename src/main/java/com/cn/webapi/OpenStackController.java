@@ -36,7 +36,7 @@ public class OpenStackController {
         }
     }
 
-    @ApiOperation(value = "获取openstack相关信息", notes = "获取openstack相关信息", position = 1)
+    @ApiOperation(value = "获取openstack相关信息", notes = "获取openstack相关信息,提供翻页查询，按照时间倒叙", position = 1)
     @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
     @GetMapping("/infoPage")
     public AjaxResponse<PageInfo<BusOpenstackLogs>> infoPage(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,
