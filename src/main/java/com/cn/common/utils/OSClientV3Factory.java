@@ -4,6 +4,7 @@ import org.openstack4j.api.OSClient.*;
 import org.openstack4j.api.types.ServiceType;
 import org.openstack4j.core.transport.Config;
 import org.openstack4j.model.common.Identifier;
+import org.openstack4j.model.compute.ext.HypervisorStatistics;
 import org.openstack4j.model.identity.v3.Endpoint;
 import org.openstack4j.openstack.OSFactory;
 import org.springframework.context.annotation.Bean;
@@ -101,10 +102,13 @@ public class OSClientV3Factory {
 //                "https://as.example.com/autoscaling-api/v1/%(project_id)s");
 
 //        System.out.println(Identifier.byName("default").toString());
+        OSClientV3 os =  OSFactory.builderV3().endpoint("http://10.0.0.128:5000/v3").credentials("admin", "admin", Identifier.byName("default"))
+                .scopeToDomain(Identifier.byId("default"))
+                .authenticate();
 //        OSClientV3 os = OSFactory.builderV3()
-//                .endpoint("http://identity.daocloud.cc/v3")
-//                .credentials("16b24e4f62fd4a70888732b12ace1bda", "FQiYa5tlBDJu4C5kqvQPEu4Z5nvfeSYXA1aMltl1", Identifier.byName("default"))
-//                .scopeToProject(Identifier.byName("admin"))
+//                .endpoint("http://10.0.0.128:5000/v3")
+//                .credentials("admin", "admin", Identifier.byName("default"))
+//                .scopeToProject(Identifier.byId("9ed6fe3193d5456982129d27dd5e3477"))
 //                .authenticate();
 //        OSClientV3 os = OSFactory.builderV3().withConfig(Config.newConfig().withEndpointURLResolver(endpointResolver))
 //                .endpoint("http://identity.daocloud.cc/v3")
@@ -116,7 +120,8 @@ public class OSClientV3Factory {
 //        endpointList.forEach(item->{
 //
 //        });
-        OSClientV3 os = authenticateUnscoped(endpointResolver,"http://my-openstack:5000/v3","81210da392d94ad982cfcef826b5acd2","7879f017c2b04fa7");
-        System.out.println(os.compute().hypervisors().list().size());
+//        OSClientV3 os = authenticateUnscoped(endpointResolver,"http://10.0.0.128:5000/v3","1b9116c74d7444768df7b23aa6cbf0d9","admin");
+        HypervisorStatistics hypervisorStatistics =os.compute().hypervisors().statistics();
+        System.out.println(hypervisorStatistics);
     }
 }

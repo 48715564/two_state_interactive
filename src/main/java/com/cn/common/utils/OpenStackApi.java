@@ -19,6 +19,8 @@ public class OpenStackApi {
     private String userId;
     @Value("${OpenStack.password}")
     private String password;
+    @Value("${OpenStack.projectId}")
+    private String projectId;
     @Value("${OpenStack.identity3Url}")
     private String apiHost;
     @Value("${OpenStack.application-catalog-url:}")
@@ -171,10 +173,10 @@ public class OpenStackApi {
         if(threadLocal.get()==null||threadLocal.get().get("unscoped")==null) {
             OSClientV3 osClientV3 = null;
             if(endpointResolver!=null&&!endpointResolver.getOverrides().isEmpty()) {
-                osClientV3 = OSClientV3Factory.authenticateUnscoped(endpointResolver, apiHost, userId, password);
+                osClientV3 = OSClientV3Factory.authenticateWithProjectScope(endpointResolver, apiHost, userId, password,"default",projectId);
             }
             else{
-                osClientV3=OSClientV3Factory.authenticateUnscoped(apiHost, userId, password);
+                osClientV3=OSClientV3Factory.authenticateWithProjectScope(apiHost, userId, password,"default",projectId);
             }
             Long timeOut = osClientV3.getToken().getExpires().getTime()-provider.now().getTime();
             Cache<String,OSClientV3> fifoCache = CacheUtil.newTimedCache(timeOut-10000);
