@@ -10,6 +10,8 @@ import org.openstack4j.model.compute.ext.HypervisorStatistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 
 /**
@@ -49,6 +51,8 @@ public class OpenStackService {
     public AjaxResponse<PageInfo<BusOpenstackLogs>> getInfoByPage(Integer page, Integer limit){
         BusOpenstackLogsExample busOpenstackLogsExample = new BusOpenstackLogsExample();
         busOpenstackLogsExample.setOrderByClause("create_tm desc");
-       return busOpenstackLogsService.findPage(page,limit,busOpenstackLogsExample);
+        AjaxResponse<PageInfo<BusOpenstackLogs>> response = busOpenstackLogsService.findPage(page,limit,busOpenstackLogsExample);
+        Collections.sort(response.getResult().getList(), Comparator.comparing(BusOpenstackLogs::getCreateTm));
+       return response;
     }
 }
