@@ -82,8 +82,9 @@ public class XClarityService{
         int jobsCount = 0;
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject jsonObject = (JSONObject) jsonArray.get(i);
-            if (!jsonObject.getBool("isDeletable"))
+            if (!jsonObject.getBool("isDeletable")) {
                 jobsCount++;
+            }
         }
         newData.put("jobsCount",jobsCount);
         ajaxResponse.setResult(newData);
@@ -197,6 +198,7 @@ public class XClarityService{
                 case 4:pendingCount++;break;
                 case 5:informationalCount++;break;
                 case 6:okCount++;break;
+                default:break;
             }
         }
         JSONObject jsonObject = new JSONObject();
@@ -304,7 +306,9 @@ public class XClarityService{
             for (int i = 0; i < len; i++) {
                 String uuid = ((JSONObject)nodeList.get(i)).getStr("itemUUID");
                 JSONObject serverEntry = serverMemoryStore.get(uuid);
-                if (serverEntry!=null) rackServers.add(serverEntry);
+                if (serverEntry!=null) {
+                    rackServers.add(serverEntry);
+                }
             }
         }
         return rackServers;
@@ -318,7 +322,9 @@ public class XClarityService{
             for (int i = 0; i < len; i++) {
                 String uuid = ((JSONObject)switchList.get(i)).getStr("itemUUID");
                 JSONObject switchEntry = switchMemoryStore.get(uuid);
-                if (switchEntry!=null) rackSwitches.add(switchEntry);
+                if (switchEntry!=null) {
+                    rackSwitches.add(switchEntry);
+                }
             }
         }
         return rackSwitches;
@@ -567,6 +573,7 @@ public class XClarityService{
             case 200:
                 status = 5;
                 break;
+            default:break;
         }
         return status;
     }
@@ -597,6 +604,7 @@ public class XClarityService{
             case "OK":case "NORMAL":case "GOOD":
                 status = 6;
                 break;
+            default:break;
         }
         return status;
     }
@@ -606,7 +614,7 @@ public class XClarityService{
         if (endpoint.get("accessState") instanceof String) {
             access = endpoint.getStr("accessState").toUpperCase();
         }
-        if (access.equals("OFFLINE")) {
+        if ("OFFLINE".equals(access)) {
             endpoint.put("cmmHealthState",endpoint.getStr("accessState"));
             return true;
         } else {
@@ -619,7 +627,7 @@ public class XClarityService{
         if (endpoint.get("accessState") instanceof String) {
             access = endpoint.getStr("accessState").toUpperCase();
         }
-        if (access.equals("PENDING")) {
+        if ("PENDING".equals(access)) {
             endpoint.put("cmmHealthState",endpoint.getStr("accessState"));
             return true;
         } else {
@@ -628,8 +636,9 @@ public class XClarityService{
     }
 
     private boolean isRackServer(JSONObject itemJSON) {
-        if ("Rack-Tower Server".equals(itemJSON.getStr("type")) || "Lenovo ThinkServer".equals(itemJSON.getStr("type")))
+        if ("Rack-Tower Server".equals(itemJSON.getStr("type")) || "Lenovo ThinkServer".equals(itemJSON.getStr("type"))) {
             return true;
+        }
         return false;
     }
 
@@ -642,12 +651,14 @@ public class XClarityService{
         }
         if (isRackServer(endpoint)) {
             String upper = endpoint.getStr("cmmHealthState").toUpperCase();
-            if (upper .equals("MAJOR") || upper .equals("MAJOR-FAILURE") || upper .equals("NON-RECOVERABLE")) {
+            if ("MAJOR".equals(upper) || "MAJOR-FAILURE".equals(upper) || "NON-RECOVERABLE".equals(upper)) {
                 endpoint.put("cmmHealthState","CRITICAL");
             }
         }
         if (endpoint.get("controllerId") != null) // lenovo storage
+        {
             endpoint.put("cmmHealthState", endpoint.get("health"));
+        }
         return endpoint.getStr("cmmHealthState");
     }
 
@@ -655,10 +666,11 @@ public class XClarityService{
         Integer returnIndex = null;
         if (statusStr instanceof Integer) { // BY NUMBER
             Integer statusIndex = _getStatusByInteger((Integer) statusStr);
-            if (statusIndex != null)
+            if (statusIndex != null) {
                 return statusIndex;
+            }
             return statusStr;
-        } else if (statusStr instanceof JSONObject && !((JSONObject) statusStr).getStr("type").equals("Lenovo Storage") && ((JSONObject) statusStr).get("canisters") instanceof JSONArray) {
+        } else if (statusStr instanceof JSONObject && !"Lenovo Storage".equals(((JSONObject) statusStr).getStr("type")) && ((JSONObject) statusStr).get("canisters") instanceof JSONArray) {
             int x = 9999;
             JSONArray array = ((JSONObject) statusStr).getJSONArray("canisters");
             for(int i=0;i<array.size();i++){
@@ -673,7 +685,9 @@ public class XClarityService{
             statusStr = _isOffline((JSONObject)statusStr) ? "Offline" : (_isPending((JSONObject)statusStr) ? "Pending" : _getStatus((JSONObject)statusStr));
         }
         if (StringUtils.isBlank(statusStr.toString())) // unsupported node?
+        {
             statusStr = "Unknown";
+        }
 
         // if not a direct return above, use string mapping to get status index
         returnIndex = _getStatusByString(statusStr.toString().toUpperCase());

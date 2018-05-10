@@ -80,15 +80,17 @@ public class OverridableEndpointURLResolver implements EndpointURLResolver {
 		Key key = Key.of(p.access.getCacheIdentifier(), p.type, p.perspective, p.region);
 		String url = CACHE.get(key);
 
-		if (url != null)
+		if (url != null) {
 			return url;
+		}
 
 		url = resolveV2(p);
 
 		if (url != null) {
 			return url;
-		} else if (p.region != null)
+		} else if (p.region != null) {
 			throw RegionEndpointNotFoundException.create(p.region, p.type.getServiceName());
+		}
 
 		return p.access.getEndpoint();
 	}
@@ -102,8 +104,9 @@ public class OverridableEndpointURLResolver implements EndpointURLResolver {
 		Key key = Key.of(p.token.getCacheIdentifier(), p.type, p.perspective, p.region);
 		String url = CACHE.get(key);
 
-		if (url != null)
+		if (url != null) {
 			return url;
+		}
 
 		// try use override endpoint first
 		String endpoint = overrides.get(p.type);
@@ -116,8 +119,9 @@ public class OverridableEndpointURLResolver implements EndpointURLResolver {
 		if (url != null) {
 			CACHE.put(key, url);
 			return url;
-		} else if (p.region != null)
+		} else if (p.region != null) {
 			throw RegionEndpointNotFoundException.create(p.region, p.type.getServiceName());
+		}
 
 		return p.token.getEndpoint();
 	}
@@ -133,15 +137,17 @@ public class OverridableEndpointURLResolver implements EndpointURLResolver {
 		if (!services.isEmpty()) {
 			Access.Service sc = p.getV2Resolver().resolveV2(p.type, services);
 			for (Endpoint ep : sc.getEndpoints()) {
-				if (p.region != null && !p.region.equalsIgnoreCase(ep.getRegion()))
+				if (p.region != null && !p.region.equalsIgnoreCase(ep.getRegion())) {
 					continue;
+				}
 
 				if (sc.getServiceType() == ServiceType.NETWORK) {
 					sc.getEndpoints().get(0).toBuilder().type(sc.getServiceType().name());
 				}
 
-				if (p.perspective == null)
+				if (p.perspective == null) {
 					return getEndpointURL(p.access, ep);
+				}
 
 				switch (p.perspective) {
 				case ADMIN:
@@ -183,8 +189,9 @@ public class OverridableEndpointURLResolver implements EndpointURLResolver {
 
 				for (org.openstack4j.model.identity.v3.Endpoint ep : service.getEndpoints()) {
 
-					if (matches(ep, p))
+					if (matches(ep, p)) {
 						return ep.getUrl().toString();
+					}
 				}
 			}
 		}
@@ -266,22 +273,29 @@ public class OverridableEndpointURLResolver implements EndpointURLResolver {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (obj == null)
+			}
+			if (obj == null) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
+			}
 			Key other = (Key) obj;
-			if (perspective != other.perspective)
+			if (perspective != other.perspective) {
 				return false;
-			if (type != other.type)
+			}
+			if (type != other.type) {
 				return false;
+			}
 			if (uid == null) {
-				if (other.uid != null)
+				if (other.uid != null) {
 					return false;
-			} else if (!uid.equals(other.uid))
+				}
+			} else if (!uid.equals(other.uid)) {
 				return false;
+			}
 			return true;
 		}
 	}

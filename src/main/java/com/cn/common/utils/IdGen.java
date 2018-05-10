@@ -57,8 +57,8 @@ public class IdGen {
         if (datacenterId > maxDatacenterId || datacenterId < 0) {
             throw new IllegalArgumentException(String.format("datacenter Id can't be greater than %d or less than 0", maxDatacenterId));
         }
-        this.workerId = workerId;
-        this.datacenterId = datacenterId;
+        IdGen.workerId = workerId;
+        IdGen.datacenterId = datacenterId;
     }
 
     public synchronized long nextId() {
@@ -98,8 +98,9 @@ public class IdGen {
             Enumeration<NetworkInterface> el = NetworkInterface.getNetworkInterfaces();
             while (el.hasMoreElements()) {
                 byte[] mac = el.nextElement().getHardwareAddress();
-                if (mac == null || (mac[0] == (byte) 0 && mac[1] == (byte) 0 && mac[2] == (byte) 0))
+                if (mac == null || (mac[0] == (byte) 0 && mac[1] == (byte) 0 && mac[2] == (byte) 0)) {
                     continue;
+                }
                 int work = byteToInt2(new byte[]{mac[0], mac[1], mac[2]});
                 int datacenter = byteToInt2(new byte[]{mac[3], mac[4], mac[5]});
                 return new int[]{Math.abs(work) % 32, Math.abs(datacenter) % 32};

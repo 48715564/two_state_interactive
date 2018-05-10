@@ -94,6 +94,7 @@ public class OpenStackApi {
             case "container":serviceType=ServiceType.MAGNUM;break;
             case "dns":serviceType=ServiceType.DNS;break;
             case "workflow":serviceType=ServiceType.WORKFLOW;break;
+            default:break;
         }
         return serviceType;
     }

@@ -31,6 +31,7 @@ public class HttpClientUtils {
         // setup a Trust Strategy that allows all certificates.
         //
         SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
+            @Override
             public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
                 return true;
             }
