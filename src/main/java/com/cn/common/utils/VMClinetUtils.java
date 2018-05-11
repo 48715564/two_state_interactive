@@ -1,12 +1,12 @@
 package com.cn.common.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.soap.SOAPFaultException;
 
@@ -55,74 +55,81 @@ public class VMClinetUtils {
 
     /**
      * 获取所有的数据中心
+     *
      * @param pathList
      * @return
      * @throws Exception
      */
     public List<ObjectContent> getAllDataCeneter(List<String> pathList) throws Exception {
-        return getAllBySpecAndType(getDatacenterTraversalSpec(),"Datacenter",pathList);
+        return getAllBySpecAndType(getDatacenterTraversalSpec(), "Datacenter", pathList);
     }
 
     /**
      * 获取所有的主机
+     *
      * @param pathList
      * @return
      * @throws Exception
      */
     public List<ObjectContent> getAllHost(List<String> pathList) throws Exception {
-        return getAllBySpecAndType(getHostSystemTraversalSpec(),"HostSystem",pathList);
+        return getAllBySpecAndType(getHostSystemTraversalSpec(), "HostSystem", pathList);
     }
 
     /**
      * 获取所有的集群
+     *
      * @param pathList
      * @return
      * @throws Exception
      */
     public List<ObjectContent> getAllCluster(List<String> pathList) throws Exception {
-        return getAllBySpecAndType(getComputeResourceTraversalSpec(),"ClusterComputeResource",pathList);
+        return getAllBySpecAndType(getComputeResourceTraversalSpec(), "ClusterComputeResource", pathList);
     }
 
 
     /**
      * 获取所有的虚拟机
+     *
      * @param pathList
      * @return
      * @throws Exception
      */
     public List<ObjectContent> getAllVM(List<String> pathList) throws Exception {
-        return getAllBySpecAndType(getVmTraversalSpec(),"VirtualMachine",pathList);
+        return getAllBySpecAndType(getVmTraversalSpec(), "VirtualMachine", pathList);
     }
 
     /**
      * 获取所有的数据存储
+     *
      * @param pathList
      * @return
      * @throws Exception
      */
     public List<ObjectContent> getAllDataStore(List<String> pathList) throws Exception {
-        return getAllBySpecAndType(getDataStoreTraversalSpec(),"Datastore",pathList);
+        return getAllBySpecAndType(getDataStoreTraversalSpec(), "Datastore", pathList);
     }
 
     /**
      * 获取所有的网络
+     *
      * @param pathList
      * @return
      * @throws Exception
      */
     public List<ObjectContent> getAllNetWork(List<String> pathList) throws Exception {
-        return getAllBySpecAndType(getNetWorkTraversalSpec(),"Network",pathList);
+        return getAllBySpecAndType(getNetWorkTraversalSpec(), "Network", pathList);
     }
 
     /**
      * 根据查询目录和查询类别查找所有
+     *
      * @param traversalSpec
      * @param type
      * @param pathList
      * @return
      * @throws Exception
      */
-    public List<ObjectContent> getAllBySpecAndType(TraversalSpec traversalSpec, String type,List<String> pathList) throws Exception {
+    public List<ObjectContent> getAllBySpecAndType(TraversalSpec traversalSpec, String type, List<String> pathList) throws Exception {
         List<ManagedObjectReference> retVal = new ArrayList<ManagedObjectReference>();
         //获取根目录对象引用
         ManagedObjectReference rootFolder = serviceContent.getRootFolder();
@@ -167,10 +174,10 @@ public class VMClinetUtils {
 
     /**
      * 获取所有的网络
+     *
      * @return
      */
-    private TraversalSpec getNetWorkTraversalSpec()
-    {
+    private TraversalSpec getNetWorkTraversalSpec() {
         SelectionSpec ss = new SelectionSpec();
         ss.setName("VisitFolders");
 
@@ -196,10 +203,10 @@ public class VMClinetUtils {
 
     /**
      * 获取数据存储搜索目录
+     *
      * @return
      */
-    private TraversalSpec getDataStoreTraversalSpec()
-    {
+    private TraversalSpec getDataStoreTraversalSpec() {
         SelectionSpec ss = new SelectionSpec();
         ss.setName("VisitFolders");
 
@@ -387,6 +394,79 @@ public class VMClinetUtils {
         sslsc.setSessionTimeout(0);
         sc.init(null, trustAllCerts, null);
         javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    }
+
+
+
+    /**
+     *
+     * 获取服务器对象监控全部监控信息
+     * @param vmmor 对象
+     * @param beginTime 开始时间
+     * @param endTime 结束时间
+     * @return
+     * @throws RuntimeFaultFaultMsg
+     * @throws DatatypeConfigurationException
+     */
+    public List<PerfCounterInfo> getMonitorData(ManagedObjectReference vmmor, XMLGregorianCalendar beginTime, XMLGregorianCalendar endTime) throws RuntimeFaultFaultMsg, DatatypeConfigurationException {
+        List<PerfCounterInfo> list = new ArrayList<>();
+        if (vmmor != null) {
+            List<PerfCounterInfo> cInfo = getPerfCounters();
+            List<PerfCounterInfo> vmCpuCounters = new ArrayList<PerfCounterInfo>();
+            for (int i = 0; i < cInfo.size(); ++i) {
+                vmCpuCounters.add(cInfo.get(i));
+            }
+
+            int i = 0;
+            Map<Integer, PerfCounterInfo> counters = new HashMap<Integer, PerfCounterInfo>();
+            for (Iterator<PerfCounterInfo> it = vmCpuCounters.iterator(); it.hasNext(); ) {
+                PerfCounterInfo pcInfo = (PerfCounterInfo) it.next();
+                counters.put(new Integer(pcInfo.getKey()), pcInfo);
+            }
+
+            List<PerfMetricId> listpermeid = vimPort.queryAvailablePerfMetric(perfManager, vmmor, null, null, null);
+
+            ArrayList<PerfMetricId> mMetrics = new ArrayList<PerfMetricId>();
+            if (listpermeid != null) {
+                for (int index = 0; index < listpermeid.size(); ++index) {
+                    if (counters.containsKey(new Integer(listpermeid.get(index).getCounterId()))) {
+                        mMetrics.add(listpermeid.get(index));
+                    }
+                }
+            }
+
+            PerfQuerySpec qSpec = new PerfQuerySpec();
+            qSpec.setEntity(vmmor);
+            qSpec.getMetricId().addAll(mMetrics);
+            qSpec.setEndTime(endTime);
+            qSpec.setStartTime(beginTime);
+
+            List<PerfQuerySpec> qSpecs = new ArrayList<>();
+            qSpecs.add(qSpec);
+
+            List<PerfEntityMetricBase> listpemb = vimPort.queryPerf(perfManager, qSpecs);
+            List<PerfEntityMetricBase> pValues = listpemb;
+
+            for (i = 0; i < pValues.size(); i++) {
+                List<PerfMetricSeries> listpems = ((PerfEntityMetric) pValues.get(i)).getValue();
+                for (int vi = 0; vi < listpems.size(); ++vi) {
+                    String printInf = "";
+                    PerfCounterInfo pci = (PerfCounterInfo) counters.get(new Integer(listpems.get(vi).getId().getCounterId()));
+
+                    if (pci != null) {
+                        if (listpems.get(vi) instanceof PerfMetricIntSeries) {
+                            printInf += vi + ":" + pci.getNameInfo().getSummary() + ":" + pci.getNameInfo().getKey() + ":" + pci.getNameInfo().getLabel() + ":"
+                                    + pci.getGroupInfo().getKey() + ":" + pci.getGroupInfo().getLabel() + ":" + pci.getGroupInfo().getSummary() + " ";
+                            list.add(pci);
+                            System.out.println(printInf);
+                        }
+                    }
+                }
+            }
+
+        }
+
+        return list;
     }
 
     /**
