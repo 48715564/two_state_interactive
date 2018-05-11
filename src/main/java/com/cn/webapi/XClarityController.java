@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class XClarityController {
     @Autowired
     private XClarityService xClarityService;
-    private static final Logger logger = LoggerFactory.getLogger(OpenStackController.class);
+    private static final Logger logger = LoggerFactory.getLogger(VmWareController.class);
 
     @ApiOperation(value = "获取硬件信息", notes = "获取硬件信息", position = 1)
     @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
