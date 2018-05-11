@@ -396,20 +396,72 @@ public class VMClinetUtils {
         javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
     }
 
+    public Map<String,Object> getMonitorData(List<PerfEntityMetricBase> listpemb, Map<Integer, PerfCounterInfo> counters, String nameInfo, String groupInfo) {
+        Map<String,Object> map = new LinkedHashMap<>();
+        List<List<Long>> longs = new ArrayList<>();
+        List<PerfEntityMetricBase> pValues = listpemb;
+        List<PerfSampleInfo> listperfsinfo = ((PerfEntityMetric) pValues.get(0)).getSampleInfo();
+        for (int i = 0; i < pValues.size(); i++) {
+            List<PerfMetricSeries> listpems = ((PerfEntityMetric) pValues.get(i)).getValue();
+            for (int vi = 0; vi < listpems.size(); ++vi) {
+                String printInf = "";
+                PerfCounterInfo pci = (PerfCounterInfo) counters.get(new Integer(listpems.get(vi).getId().getCounterId()));
+                map.put("startTime",(listperfsinfo.get(0).getTimestamp()));
+                map.put("endTime",listperfsinfo.get(listperfsinfo.size() - 1).getTimestamp());
+                if (pci != null) {
+                    if (pci.getNameInfo().getKey().equalsIgnoreCase(nameInfo) && pci.getGroupInfo().getKey().equalsIgnoreCase(groupInfo)) {
+                        printInf += vi + ":" + pci.getNameInfo().getSummary() + ":" + pci.getNameInfo().getKey() + ":" + pci.getNameInfo().getLabel() + ":"
+                                + pci.getGroupInfo().getKey() + ":" + pci.getGroupInfo().getLabel() + ":" + pci.getGroupInfo().getSummary() + " ";
 
+                        if (listpems.get(vi) instanceof PerfMetricIntSeries) {
+                            PerfMetricIntSeries val = (PerfMetricIntSeries) listpems.get(vi);
+                            List<Long> lislon = val.getValue();
+                            for (Long k : lislon) {
+                                printInf += k + " ";
+                            }
+                            longs.add(lislon);
+                        }
+                        printInf += "   " + pci.getUnitInfo().getKey() + " " + pci.getUnitInfo().getLabel() + " " + pci.getUnitInfo().getSummary();
+                        System.out.println(printInf);
+                    }
+                }
+            }
+        }
+        map.put("longs",longs);
+        return map;
+    }
+
+    public ManagedObjectReference getHostByName(String hostName, List<String> pathList) throws Exception {
+        List<ObjectContent> listobjcont = getAllHost(pathList);
+        if (listobjcont != null) {
+            for (ObjectContent oc : listobjcont) {
+                ManagedObjectReference mr = oc.getObj();
+                String hostnm = null;
+                List<DynamicProperty> listDynamicProps = oc.getPropSet();
+                DynamicProperty[] dps = listDynamicProps.toArray(new DynamicProperty[listDynamicProps.size()]);
+                if (dps != null) {
+                    for (DynamicProperty dp : dps) {
+                        hostnm = (String) dp.getVal();
+                    }
+                }
+                if (hostnm != null && hostnm.equals(hostName)) {
+                    return mr;
+                }
+            }
+        }
+        return null;
+    }
 
     /**
-     *
      * 获取服务器对象监控全部监控信息
-     * @param vmmor 对象
-     * @param beginTime 开始时间
-     * @param endTime 结束时间
+     *
+     * @param vmmor     对象
      * @return
      * @throws RuntimeFaultFaultMsg
      * @throws DatatypeConfigurationException
      */
-    public List<PerfCounterInfo> getMonitorData(ManagedObjectReference vmmor, XMLGregorianCalendar beginTime, XMLGregorianCalendar endTime) throws RuntimeFaultFaultMsg, DatatypeConfigurationException {
-        List<PerfCounterInfo> list = new ArrayList<>();
+    public Map<String, Object> getMonitorAllData(ManagedObjectReference vmmor, Integer monitorSize, Integer intervalId) throws RuntimeFaultFaultMsg, DatatypeConfigurationException {
+        Map<String, Object> map = new LinkedHashMap<>();
         if (vmmor != null) {
             List<PerfCounterInfo> cInfo = getPerfCounters();
             List<PerfCounterInfo> vmCpuCounters = new ArrayList<PerfCounterInfo>();
@@ -424,7 +476,7 @@ public class VMClinetUtils {
                 counters.put(new Integer(pcInfo.getKey()), pcInfo);
             }
 
-            List<PerfMetricId> listpermeid = vimPort.queryAvailablePerfMetric(perfManager, vmmor, null, null, null);
+            List<PerfMetricId> listpermeid = vimPort.queryAvailablePerfMetric(perfManager, vmmor, null, null, intervalId);
 
             ArrayList<PerfMetricId> mMetrics = new ArrayList<PerfMetricId>();
             if (listpermeid != null) {
@@ -438,35 +490,18 @@ public class VMClinetUtils {
             PerfQuerySpec qSpec = new PerfQuerySpec();
             qSpec.setEntity(vmmor);
             qSpec.getMetricId().addAll(mMetrics);
-            qSpec.setEndTime(endTime);
-            qSpec.setStartTime(beginTime);
-
+//            qSpec.setMaxSample(monitorSize);
+            qSpec.setIntervalId(intervalId);
+            qSpec.setEndTime(DateUtils.dateToXmlDate(new Date()));
+            qSpec.setStartTime(DateUtils.dateToXmlDate(new Date(System.currentTimeMillis()-30*60*1000)));
             List<PerfQuerySpec> qSpecs = new ArrayList<>();
             qSpecs.add(qSpec);
 
             List<PerfEntityMetricBase> listpemb = vimPort.queryPerf(perfManager, qSpecs);
-            List<PerfEntityMetricBase> pValues = listpemb;
-
-            for (i = 0; i < pValues.size(); i++) {
-                List<PerfMetricSeries> listpems = ((PerfEntityMetric) pValues.get(i)).getValue();
-                for (int vi = 0; vi < listpems.size(); ++vi) {
-                    String printInf = "";
-                    PerfCounterInfo pci = (PerfCounterInfo) counters.get(new Integer(listpems.get(vi).getId().getCounterId()));
-
-                    if (pci != null) {
-                        if (listpems.get(vi) instanceof PerfMetricIntSeries) {
-                            printInf += vi + ":" + pci.getNameInfo().getSummary() + ":" + pci.getNameInfo().getKey() + ":" + pci.getNameInfo().getLabel() + ":"
-                                    + pci.getGroupInfo().getKey() + ":" + pci.getGroupInfo().getLabel() + ":" + pci.getGroupInfo().getSummary() + " ";
-                            list.add(pci);
-                            System.out.println(printInf);
-                        }
-                    }
-                }
-            }
-
+            map.put("counters", counters);
+            map.put("listpemb", listpemb);
         }
-
-        return list;
+        return map;
     }
 
     /**
