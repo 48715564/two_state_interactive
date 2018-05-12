@@ -401,13 +401,13 @@ public class VMClinetUtils {
         List<List<Long>> longs = new ArrayList<>();
         List<PerfEntityMetricBase> pValues = listpemb;
         List<PerfSampleInfo> listperfsinfo = ((PerfEntityMetric) pValues.get(0)).getSampleInfo();
+        map.put("startTime",(listperfsinfo.get(0).getTimestamp()));
+        map.put("endTime",listperfsinfo.get(listperfsinfo.size() - 1).getTimestamp());
         for (int i = 0; i < pValues.size(); i++) {
             List<PerfMetricSeries> listpems = ((PerfEntityMetric) pValues.get(i)).getValue();
             for (int vi = 0; vi < listpems.size(); ++vi) {
                 String printInf = "";
                 PerfCounterInfo pci = (PerfCounterInfo) counters.get(new Integer(listpems.get(vi).getId().getCounterId()));
-                map.put("startTime",(listperfsinfo.get(0).getTimestamp()));
-                map.put("endTime",listperfsinfo.get(listperfsinfo.size() - 1).getTimestamp());
                 if (pci != null) {
                     if (pci.getNameInfo().getKey().equalsIgnoreCase(nameInfo) && pci.getGroupInfo().getKey().equalsIgnoreCase(groupInfo)) {
                         printInf += vi + ":" + pci.getNameInfo().getSummary() + ":" + pci.getNameInfo().getKey() + ":" + pci.getNameInfo().getLabel() + ":"
@@ -415,6 +415,7 @@ public class VMClinetUtils {
 
                         if (listpems.get(vi) instanceof PerfMetricIntSeries) {
                             PerfMetricIntSeries val = (PerfMetricIntSeries) listpems.get(vi);
+                            System.out.println(val.getId().getInstance());
                             List<Long> lislon = val.getValue();
                             for (Long k : lislon) {
                                 printInf += k + " ";
