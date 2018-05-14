@@ -12,6 +12,7 @@ import javax.xml.ws.soap.SOAPFaultException;
 
 import com.cn.common.infrastructure.Constant;
 import com.vmware.vim25.*;
+import com.xiaoleilu.hutool.date.DateUtil;
 
 public class VMClinetUtils {
     private String url = Constant.url;
@@ -397,39 +398,39 @@ public class VMClinetUtils {
     }
 
     public Map<String,Object> getMonitorData(List<PerfEntityMetricBase> listpemb, Map<Integer, PerfCounterInfo> counters, String nameInfo, String groupInfo) {
-        Map<String,Object> map = new LinkedHashMap<>();
-        List<List<Long>> longs = new ArrayList<>();
-        List<PerfEntityMetricBase> pValues = listpemb;
-        List<PerfSampleInfo> listperfsinfo = ((PerfEntityMetric) pValues.get(0)).getSampleInfo();
-        map.put("startTime",(listperfsinfo.get(0).getTimestamp()));
-        map.put("endTime",listperfsinfo.get(listperfsinfo.size() - 1).getTimestamp());
-        for (int i = 0; i < pValues.size(); i++) {
-            List<PerfMetricSeries> listpems = ((PerfEntityMetric) pValues.get(i)).getValue();
-            for (int vi = 0; vi < listpems.size(); ++vi) {
-                String printInf = "";
-                PerfCounterInfo pci = (PerfCounterInfo) counters.get(new Integer(listpems.get(vi).getId().getCounterId()));
-                if (pci != null) {
-                    if (pci.getNameInfo().getKey().equalsIgnoreCase(nameInfo) && pci.getGroupInfo().getKey().equalsIgnoreCase(groupInfo)) {
-                        printInf += vi + ":" + pci.getNameInfo().getSummary() + ":" + pci.getNameInfo().getKey() + ":" + pci.getNameInfo().getLabel() + ":"
-                                + pci.getGroupInfo().getKey() + ":" + pci.getGroupInfo().getLabel() + ":" + pci.getGroupInfo().getSummary() + " ";
-
-                        if (listpems.get(vi) instanceof PerfMetricIntSeries) {
-                            PerfMetricIntSeries val = (PerfMetricIntSeries) listpems.get(vi);
-                            System.out.println(val.getId().getInstance());
-                            List<Long> lislon = val.getValue();
-                            for (Long k : lislon) {
-                                printInf += k + " ";
+        if(listpemb!=null&&counters!=null&&listpemb.size()>0&&counters.size()>0) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            List<Map> longs = new ArrayList<>();
+            List<PerfEntityMetricBase> pValues = listpemb;
+            List<PerfSampleInfo> listperfsinfo = ((PerfEntityMetric) pValues.get(0)).getSampleInfo();
+            map.put("startTime", (DateUtil.format(DateUtils.xmlDate2Date(listperfsinfo.get(0).getTimestamp()),"yyyy-MM-dd HH:mm:ss")));
+            map.put("endTime", DateUtil.format(DateUtils.xmlDate2Date(listperfsinfo.get(listperfsinfo.size() - 1).getTimestamp()),"yyyy-MM-dd HH:mm:ss"));
+            for (int i = 0; i < pValues.size(); i++) {
+                List<PerfMetricSeries> listpems = ((PerfEntityMetric) pValues.get(i)).getValue();
+                for (int vi = 0; vi < listpems.size(); ++vi) {
+                    String printInf = "";
+                    PerfCounterInfo pci = (PerfCounterInfo) counters.get(new Integer(listpems.get(vi).getId().getCounterId()));
+                    if (pci != null) {
+                        if (pci.getNameInfo().getKey().equalsIgnoreCase(nameInfo) && pci.getGroupInfo().getKey().equalsIgnoreCase(groupInfo)) {
+                            if (listpems.get(vi) instanceof PerfMetricIntSeries) {
+                                PerfMetricIntSeries val = (PerfMetricIntSeries) listpems.get(vi);
+                                List<Long> lislon = val.getValue();
+                                for (Long k : lislon) {
+                                    printInf += k + " ";
+                                }
+                                Map<String, Object> tmpMap = new LinkedHashMap<>();
+                                tmpMap.put("instance", val.getId().getInstance());
+                                tmpMap.put("list", lislon);
+                                longs.add(tmpMap);
                             }
-                            longs.add(lislon);
                         }
-                        printInf += "   " + pci.getUnitInfo().getKey() + " " + pci.getUnitInfo().getLabel() + " " + pci.getUnitInfo().getSummary();
-                        System.out.println(printInf);
                     }
                 }
             }
+            map.put("longs", longs);
+            return map;
         }
-        map.put("longs",longs);
-        return map;
+        return null;
     }
 
     public ManagedObjectReference getHostByName(String hostName, List<String> pathList) throws Exception {
@@ -461,7 +462,7 @@ public class VMClinetUtils {
      * @throws RuntimeFaultFaultMsg
      * @throws DatatypeConfigurationException
      */
-    public Map<String, Object> getMonitorAllData(ManagedObjectReference vmmor, Integer monitorSize, Integer intervalId) throws RuntimeFaultFaultMsg, DatatypeConfigurationException {
+    public Map<String, Object> getMonitorAllData(ManagedObjectReference vmmor,Integer intervalId) throws RuntimeFaultFaultMsg, DatatypeConfigurationException {
         Map<String, Object> map = new LinkedHashMap<>();
         if (vmmor != null) {
             List<PerfCounterInfo> cInfo = getPerfCounters();
@@ -493,8 +494,8 @@ public class VMClinetUtils {
             qSpec.getMetricId().addAll(mMetrics);
 //            qSpec.setMaxSample(monitorSize);
             qSpec.setIntervalId(intervalId);
-            qSpec.setEndTime(DateUtils.dateToXmlDate(new Date()));
-            qSpec.setStartTime(DateUtils.dateToXmlDate(new Date(System.currentTimeMillis()-30*60*1000)));
+//            qSpec.setEndTime(DateUtils.dateToXmlDate(startDate));
+//            qSpec.setStartTime(DateUtils.dateToXmlDate(endDate));
             List<PerfQuerySpec> qSpecs = new ArrayList<>();
             qSpecs.add(qSpec);
 

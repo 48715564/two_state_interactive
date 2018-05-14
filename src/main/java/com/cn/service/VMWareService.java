@@ -11,8 +11,6 @@ import java.util.*;
 
 @Component
 public class VMWareService {
-    @Value("${VM.monitorSize}")
-    private Integer monitorSize;
     ThreadLocal<VMClinetUtils> threadLocal = new ThreadLocal<>();
 
     private void connectionVm() throws Exception {
@@ -86,23 +84,52 @@ public class VMWareService {
     public AjaxResponse<Map<String, Object>> getMonitorData(String hostName) throws Exception {
         try {
             connectionVm();
+            AjaxResponse<Map<String, Object>> ajaxResponse = new AjaxResponse<>();
             VMClinetUtils vmClinetUtils = threadLocal.get();
             List<String> pathList = new ArrayList<>();
             pathList.add("name");
             ManagedObjectReference host = vmClinetUtils.getHostByName(hostName,pathList);
-            Map<String, Object> map = vmClinetUtils.getMonitorAllData(host, monitorSize,20);
+            Map<String, Object> map = vmClinetUtils.getMonitorAllData(host,20);
             if(map!=null) {
                 List<PerfEntityMetricBase> listpemb = (List<PerfEntityMetricBase>) map.get("listpemb");
                 Map<Integer, PerfCounterInfo> counters = (Map<Integer, PerfCounterInfo>) map.get("counters");
-                Map<String,Object> vmMap = vmClinetUtils.getMonitorData(listpemb,counters,"usage","cpu");
-                System.out.println(vmMap);
+                //cpu使用率
+                Map<String,Object> cpuMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","cpu"));
+
+                //内存使用率
+                Map<String,Object> memMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","mem"));
+                //磁盘使用率
+                Map<String,Object> diskMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","disk"));
+                //磁盘使用率
+                Map<String,Object> netMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","net"));
+                Map<String,Object> dataMap = new LinkedHashMap<>();
+                dataMap.put("cpuMap",cpuMap);
+                dataMap.put("memMap",memMap);
+                dataMap.put("diskMap",diskMap);
+                dataMap.put("netMap",netMap);
+                ajaxResponse.setResult(dataMap);
             }
-            return null;
+            return ajaxResponse;
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         } finally {
             disconnectionVm();
         }
+    }
+
+
+    private Map<String,Object> getDateList(Map<String,Object> dataMap){
+        if(dataMap!=null) {
+            String startTime = String.valueOf(dataMap.get("startTime"));
+            String endTime = String.valueOf(dataMap.get("endTime"));
+            List<Map> longs = (List<Map>) dataMap.get("longs");
+            if(longs.size()>0) {
+                Map<String, Object> tmpMap = longs.get(0);
+                List<Long> list = (List<Long>) tmpMap.get("list");
+                dataMap.put("xLine", DateUtils.getAllDateStr(startTime, endTime, list.size()));
+            }
+        }
+        return dataMap;
     }
 }
