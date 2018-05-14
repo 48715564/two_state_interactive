@@ -1,6 +1,5 @@
 package com.cn.common.infrastructure;
 
-import com.cn.common.utils.VMClinetUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;

@@ -4,8 +4,6 @@ import com.cn.common.exception.ResponseException;
 import com.cn.page.AjaxResponse;
 import com.cn.service.VMWareService;
 import com.vmware.vim25.ObjectContent;
-import com.xiaoleilu.hutool.json.JSONArray;
-import com.xiaoleilu.hutool.json.JSONObject;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
