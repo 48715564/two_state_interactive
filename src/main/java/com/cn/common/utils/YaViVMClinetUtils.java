@@ -1,7 +1,6 @@
 package com.cn.common.utils;
 
 import com.cn.common.infrastructure.Constant;
-import com.google.common.collect.Lists;
 import com.vmware.vim25.*;
 import com.vmware.vim25.mo.*;
 import com.xiaoleilu.hutool.date.DateUtil;
@@ -25,7 +24,7 @@ public class YaViVMClinetUtils {
      */
     public void connect() {
         try {
-            si = new ServiceInstance(new URL("https://10.0.7.45/sdk"), "administrator@daocloud.io", "Admin@123", true);
+            si = new ServiceInstance(new URL(url), userName, password, true);
 //            si = new ServiceInstance(new URL(url), userName, password, true);
         } catch (SOAPFaultException sfe) {
             sfe.printStackTrace();
