@@ -57,7 +57,9 @@ public class VMWareService {
             List<ObjectContent> hostList = new ArrayList<>();
             List<String> hostPathList = new ArrayList<>();
             hostPathList.add("runtime.connectionState");
+            hostPathList.add("summary");
             hostPathList.addAll(pathList);
+
             for(HostSystem hostSystem:tmpHostList){
                 ObjectContent objectContent = new ObjectContent();
                 objectContent.obj = hostSystem.getMOR();
@@ -88,7 +90,6 @@ public class VMWareService {
                 objectContent.propSet=dynamicProperties;
                 vmList.add(objectContent);
             }
-            //获取存储
             List<Datastore> tmpDsList = vmClinetUtils.getAllDataStore();
             List<ObjectContent> dsList = new ArrayList<>();
             List<String> dataStorePathList = new ArrayList<>();
@@ -128,32 +129,31 @@ public class VMWareService {
         }
     }
 
-    public AjaxResponse<Map<String, Object>> getMonitorData(String hostName) throws Exception {
+    public AjaxResponse<Map<String, Object>> getHostMonitorData(String hostName) throws Exception {
         try {
+            int intervalTime = 20;
             connectionVm();
             AjaxResponse<Map<String, Object>> ajaxResponse = new AjaxResponse<>();
             YaViVMClinetUtils vmClinetUtils = threadLocal.get();
-            List<String> pathList = new ArrayList<>();
-            pathList.add("name");
             ManagedEntity host = vmClinetUtils.getHostByName(hostName);
-            Map<String, Object> map = vmClinetUtils.getMonitorAllData(host,20);
+            Map<String, Object> map = vmClinetUtils.getMonitorAllData(host,intervalTime);
             if(map!=null) {
                 List<PerfEntityMetricBase> listpemb = (List<PerfEntityMetricBase>) map.get("listpemb");
                 Map<Integer, PerfCounterInfo> counters = (Map<Integer, PerfCounterInfo>) map.get("counters");
                 //cpu使用率
-                Map<String,Object> cpuMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","cpu"));
+                Map<String,Object> cpuMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","cpu"),intervalTime);
 
                 //内存使用率
-                Map<String,Object> memMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","mem"));
+                Map<String,Object> memMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","mem"),intervalTime);
                 //磁盘使用率
-                Map<String,Object> diskMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","disk"));
+                Map<String,Object> diskMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","disk"),intervalTime);
                 //磁盘使用率
-                Map<String,Object> netMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","net"));
+                Map<String,Object> netMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","net"),intervalTime);
                 Map<String,Object> dataMap = new LinkedHashMap<>();
-                dataMap.put("cpuMap",cpuMap);
-                dataMap.put("memMap",memMap);
-                dataMap.put("diskMap",diskMap);
-                dataMap.put("netMap",netMap);
+                dataMap.put("data1",cpuMap);
+                dataMap.put("data2",memMap);
+                dataMap.put("data3",diskMap);
+                dataMap.put("data4",netMap);
                 ajaxResponse.setResult(dataMap);
             }
             return ajaxResponse;
@@ -166,7 +166,80 @@ public class VMWareService {
     }
 
 
-    private Map<String,Object> getDateList(Map<String,Object> dataMap){
+    public AjaxResponse<Map<String, Object>> getClusterMonitorData(String clusterName) throws Exception {
+        try {
+            int intervalTime = 300;
+            connectionVm();
+            AjaxResponse<Map<String, Object>> ajaxResponse = new AjaxResponse<>();
+            YaViVMClinetUtils vmClinetUtils = threadLocal.get();
+            ManagedEntity datcenter = vmClinetUtils.getClusterByName(clusterName);
+            Map<String, Object> map = vmClinetUtils.getMonitorAllData(datcenter,intervalTime);
+            if(map!=null) {
+                List<PerfEntityMetricBase> listpemb = (List<PerfEntityMetricBase>) map.get("listpemb");
+                Map<Integer, PerfCounterInfo> counters = (Map<Integer, PerfCounterInfo>) map.get("counters");
+                //cpu使用率
+                Map<String,Object> cpuMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","cpu"),intervalTime);
+                //cpu使用情况 MHZ
+                Map<String,Object> cpuMHZMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usagemhz","cpu"),intervalTime);
+                //内存使用率
+                Map<String,Object> memMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"usage","mem"),intervalTime);
+                //内存已消耗 KB
+                Map<String,Object> memConsumedMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"consumed","mem"),intervalTime);
+                Map<String,Object> dataMap = new LinkedHashMap<>();
+                dataMap.put("data1",cpuMap);
+                dataMap.put("data2",cpuMHZMap);
+                dataMap.put("data3",memMap);
+                dataMap.put("data4",memConsumedMap);
+                ajaxResponse.setResult(dataMap);
+            }
+            return ajaxResponse;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            disconnectionVm();
+        }
+    }
+
+
+    public AjaxResponse<Map<String, Object>> getDataCenterMonitorData(String dataCenterName) throws Exception {
+        try {
+            int intervalTime = 300;
+            connectionVm();
+            AjaxResponse<Map<String, Object>> ajaxResponse = new AjaxResponse<>();
+            YaViVMClinetUtils vmClinetUtils = threadLocal.get();
+            ManagedEntity datcenter = vmClinetUtils.getDataCenterByName(dataCenterName);
+            Date eTime = new Date();
+            Date sTime = new Date(eTime.getTime() - 24 * 60 * 60 * 1000);
+            Map<String, Object> map = vmClinetUtils.getMonitorAllData(datcenter,intervalTime,sTime,eTime);
+            if(map!=null) {
+                List<PerfEntityMetricBase> listpemb = (List<PerfEntityMetricBase>) map.get("listpemb");
+                Map<Integer, PerfCounterInfo> counters = (Map<Integer, PerfCounterInfo>) map.get("counters");
+                //虚拟机打开电源次数
+                Map<String,Object> numPoweronMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"numPoweron","vmop"),intervalTime);
+                //虚拟机关闭电源次数
+                Map<String,Object> numPoweroffMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"numPoweroff","vmop"),intervalTime);
+                //虚拟机克隆次数
+                Map<String,Object> numCloneMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"numClone","vmop"),intervalTime);
+                //虚拟机创建次数
+                Map<String,Object> numCreateMap = getDateList(vmClinetUtils.getMonitorData(listpemb,counters,"numCreate","vmop"),intervalTime);
+                Map<String,Object> dataMap = new LinkedHashMap<>();
+                dataMap.put("data1",numPoweronMap);
+                dataMap.put("data2",numPoweroffMap);
+                dataMap.put("data3",numCloneMap);
+                dataMap.put("data4",numCreateMap);
+                ajaxResponse.setResult(dataMap);
+            }
+            return ajaxResponse;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            disconnectionVm();
+        }
+    }
+
+    private Map<String,Object> getDateList(Map<String,Object> dataMap,int intervalTime){
         if(dataMap!=null) {
             String startTime = String.valueOf(dataMap.get("startTime"));
             String endTime = String.valueOf(dataMap.get("endTime"));
@@ -174,7 +247,7 @@ public class VMWareService {
             if(longs.size()>0) {
                 Map<String, Object> tmpMap = longs.get(0);
                 long[] list = (long[]) tmpMap.get("list");
-                dataMap.put("xLine", DateUtils.getAllDateStr(startTime, endTime, list.length));
+                dataMap.put("xLine", DateUtils.getAllDateStr(startTime, endTime, list.length,intervalTime));
             }
         }
         return dataMap;

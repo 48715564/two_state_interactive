@@ -25,7 +25,6 @@ public class YaViVMClinetUtils {
     public void connect() {
         try {
             si = new ServiceInstance(new URL(url), userName, password, true);
-//            si = new ServiceInstance(new URL(url), userName, password, true);
         } catch (SOAPFaultException sfe) {
             sfe.printStackTrace();
         } catch (Exception e) {
@@ -129,6 +128,14 @@ public class YaViVMClinetUtils {
         return getManagedEntityByName("HostSystem", hostName);
     }
 
+    public ManagedEntity getDataCenterByName(String dataCenterName) throws RemoteException {
+        return getManagedEntityByName("Datacenter", dataCenterName);
+    }
+
+    public ManagedEntity getClusterByName(String clusterName) throws RemoteException {
+        return getManagedEntityByName("ClusterComputeResource", clusterName);
+    }
+
     public Map<String, Object> getMonitorAllData(ManagedEntity mo, int interval) throws RemoteException {
         Map<String, Object> map = new LinkedHashMap<>();
         if (mo != null) {
@@ -151,6 +158,44 @@ public class YaViVMClinetUtils {
             qSpec.setEntity(mo.getMOR());
             qSpec.setMetricId(listpermeid);
             qSpec.setIntervalId(interval);
+//            qSpec.setFormat("normal");
+            PerfQuerySpec[] arryQuery = {qSpec};
+            PerfEntityMetricBase[] pValues = performanceManager.queryPerf(arryQuery);
+            List<PerfEntityMetricBase> listpemb = Arrays.asList(pValues);
+            map.put("counters", counters);
+            map.put("listpemb", listpemb);
+        }
+        return map;
+    }
+
+    public Map<String, Object> getMonitorAllData(ManagedEntity mo, int interval,Date sTime,Date eTime) throws RemoteException {
+        Map<String, Object> map = new LinkedHashMap<>();
+        if (mo != null) {
+            Calendar calBegin = Calendar.getInstance();
+            calBegin.setTime(sTime);
+            Calendar calEnd = Calendar.getInstance();
+            calEnd.setTime(eTime);
+            PerformanceManager performanceManager = si.getPerformanceManager();
+            PerfCounterInfo[] cInfo = performanceManager.getPerfCounter();
+            Map<Integer, PerfCounterInfo> counters = new HashMap<Integer, PerfCounterInfo>();
+            for (PerfCounterInfo pcInfo : cInfo) {
+                counters.put(new Integer(pcInfo.getKey()), pcInfo);
+            }
+            PerfMetricId[] listpermeid = performanceManager.queryAvailablePerfMetric(mo, null, null, interval);
+            ArrayList<PerfMetricId> mMetrics = new ArrayList<PerfMetricId>();
+            if (listpermeid != null) {
+                for (int index = 0; index < listpermeid.length; ++index) {
+                    if (counters.containsKey(new Integer(listpermeid[index].getCounterId()))) {
+                        mMetrics.add(listpermeid[index]);
+                    }
+                }
+            }
+            PerfQuerySpec qSpec = new PerfQuerySpec();
+            qSpec.setEntity(mo.getMOR());
+            qSpec.setMetricId(listpermeid);
+            qSpec.setIntervalId(interval);
+            qSpec.setStartTime(calBegin);
+            qSpec.setEndTime(calEnd);
 //            qSpec.setFormat("normal");
             PerfQuerySpec[] arryQuery = {qSpec};
             PerfEntityMetricBase[] pValues = performanceManager.queryPerf(arryQuery);

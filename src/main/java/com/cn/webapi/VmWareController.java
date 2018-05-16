@@ -38,15 +38,40 @@ public class VmWareController {
         }
     }
 
-    @ApiOperation(value = "所有的数量信息", notes = "所有的数量信息", position = 1)
+    @ApiOperation(value = "指定主机的监控信息", notes = "指定主机的监控信息", position = 1)
     @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
-    @GetMapping("/getMonitorData")
-    public AjaxResponse<Map<String, Object>> getMonitorData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,@ApiParam(value = "主机名称", required = true) @RequestParam String hostName){
+    @GetMapping("/getHostMonitorData")
+    public AjaxResponse<Map<String, Object>> getHostMonitorData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,@ApiParam(value = "主机名称", required = true) @RequestParam String hostName){
         try {
-            return vmWareService.getMonitorData(hostName);
+            return vmWareService.getHostMonitorData(hostName);
         }catch (Exception e){
             logger.error(e.getMessage());
             throw new ResponseException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @ApiOperation(value = "指定数据中心的监控信息", notes = "指定数据中心的监控信息", position = 1)
+    @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
+    @GetMapping("/getDataCenterMonitorData")
+    public AjaxResponse<Map<String, Object>> getDataCenterMonitorData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,@ApiParam(value = "数据中心名称", required = true) @RequestParam String dataCenterName){
+        try {
+            return vmWareService.getDataCenterMonitorData(dataCenterName);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            throw new ResponseException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "指定集群的监控信息", notes = "指定集群的监控信息", position = 1)
+    @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
+    @GetMapping("/getClusterMonitorData")
+    public AjaxResponse<Map<String, Object>> getClusterMonitorData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,@ApiParam(value = "数据中心名称", required = true) @RequestParam String clusterName){
+        try {
+            return vmWareService.getClusterMonitorData(clusterName);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            throw new ResponseException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
