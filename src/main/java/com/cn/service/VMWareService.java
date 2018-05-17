@@ -185,7 +185,7 @@ public class VMWareService {
 
     public AjaxResponse<Map<String, Object>> getClusterMonitorData(String clusterName) throws Exception {
         try {
-            int intervalTime = 1800;
+            int intervalTime = 300;
             connectionVm();
             Date eTime = new Date();
             Date sTime = new Date(eTime.getTime() - 24 * 60 * 60 * 1000);
