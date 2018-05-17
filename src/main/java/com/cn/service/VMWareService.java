@@ -185,7 +185,7 @@ public class VMWareService {
 
     public AjaxResponse<Map<String, Object>> getClusterMonitorData(String clusterName) throws Exception {
         try {
-            int intervalTime = 300;
+            int intervalTime = 1800;
             connectionVm();
             Date eTime = new Date();
             Date sTime = new Date(eTime.getTime() - 24 * 60 * 60 * 1000);
@@ -250,7 +250,7 @@ public class VMWareService {
 
     public AjaxResponse<Map<String, Object>> getDataCenterMonitorData(String dataCenterName) throws Exception {
         try {
-            int intervalTime = 300;
+            int intervalTime = 1800;
             connectionVm();
             AjaxResponse<Map<String, Object>> ajaxResponse = new AjaxResponse<>();
             YaViVMClinetUtils vmClinetUtils = threadLocal.get();
