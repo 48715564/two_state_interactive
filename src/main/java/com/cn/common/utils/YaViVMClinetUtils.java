@@ -128,12 +128,24 @@ public class YaViVMClinetUtils {
         return getManagedEntityByName("HostSystem", hostName);
     }
 
+    public ManagedEntity getVMByName(String vmName) throws RemoteException {
+        return getManagedEntityByName("VirtualMachine", vmName);
+    }
+
     public ManagedEntity getDataCenterByName(String dataCenterName) throws RemoteException {
         return getManagedEntityByName("Datacenter", dataCenterName);
     }
 
     public ManagedEntity getClusterByName(String clusterName) throws RemoteException {
         return getManagedEntityByName("ClusterComputeResource", clusterName);
+    }
+
+    public ManagedEntity getDatastoreByName(String dsName) throws RemoteException {
+        return getManagedEntityByName("Datastore", dsName);
+    }
+
+    public ManagedEntity getNetworkByName(String networkName) throws RemoteException {
+        return getManagedEntityByName("Network", networkName);
     }
 
     public Map<String, Object> getMonitorAllData(ManagedEntity mo, int interval) throws RemoteException {
@@ -161,9 +173,11 @@ public class YaViVMClinetUtils {
 //            qSpec.setFormat("normal");
             PerfQuerySpec[] arryQuery = {qSpec};
             PerfEntityMetricBase[] pValues = performanceManager.queryPerf(arryQuery);
-            List<PerfEntityMetricBase> listpemb = Arrays.asList(pValues);
-            map.put("counters", counters);
-            map.put("listpemb", listpemb);
+            if(pValues!=null&&counters!=null) {
+                List<PerfEntityMetricBase> listpemb = Arrays.asList(pValues);
+                map.put("counters", counters);
+                map.put("listpemb", listpemb);
+            }
         }
         return map;
     }

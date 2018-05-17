@@ -65,7 +65,7 @@ public class VmWareController {
     @ApiOperation(value = "指定集群的监控信息", notes = "指定集群的监控信息", position = 1)
     @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
     @GetMapping("/getClusterMonitorData")
-    public AjaxResponse<Map<String, Object>> getClusterMonitorData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,@ApiParam(value = "数据中心名称", required = true) @RequestParam String clusterName){
+    public AjaxResponse<Map<String, Object>> getClusterMonitorData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,@ApiParam(value = "集群名称", required = true) @RequestParam String clusterName){
         try {
             return vmWareService.getClusterMonitorData(clusterName);
         }catch (Exception e){
@@ -74,4 +74,39 @@ public class VmWareController {
         }
     }
 
+    @ApiOperation(value = "指定虚拟机的监控信息", notes = "指定虚拟机的监控信息", position = 1)
+    @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
+    @GetMapping("/getVMMonitorData")
+    public AjaxResponse<Map<String, Object>> getVMMonitorData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,@ApiParam(value = "集群名称", required = true) @RequestParam String vmName){
+        try {
+            return vmWareService.getVMMonitorData(vmName);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            throw new ResponseException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "指定存储的监控信息", notes = "指定存储的监控信息", position = 1)
+    @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
+    @GetMapping("/getDSMonitorData")
+    public AjaxResponse<Map<String, Object>> getDSMonitorData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,@ApiParam(value = "存储名称", required = true) @RequestParam String dsName){
+        try {
+            return vmWareService.getDataStoreMonitorData(dsName);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            throw new ResponseException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "指定网络的监控信息", notes = "指定网络的监控信息", position = 1)
+    @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
+    @GetMapping("/getNetworkMonitorData")
+    public AjaxResponse<Map<String, Object>> getNetworkMonitorData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,@ApiParam(value = "网络名称", required = true) @RequestParam String networkName){
+        try {
+            return vmWareService.getNetworkMonitorData(networkName);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            throw new ResponseException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
