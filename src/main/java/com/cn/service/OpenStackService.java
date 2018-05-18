@@ -6,13 +6,14 @@ import com.cn.domain.entity.BusOpenstackLogsExample;
 import com.cn.page.AjaxResponse;
 import com.github.pagehelper.PageInfo;
 import org.openstack4j.api.OSClient;
+import org.openstack4j.model.compute.HostResource;
+import org.openstack4j.model.compute.ext.Hypervisor;
 import org.openstack4j.model.compute.ext.HypervisorStatistics;
+import org.openstack4j.model.network.Network;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
+import java.util.*;
 
 /**
  * Created by bozhou on 2017/12/18.
@@ -24,8 +25,7 @@ public class OpenStackService {
     @Autowired
     private BusOpenstackLogsService busOpenstackLogsService;
 
-
-    public AjaxResponse<BusOpenstackLogs> getInfo(){
+    public BusOpenstackLogs getCountInfo(){
         BusOpenstackLogs jsonObject = new BusOpenstackLogs();
         OSClient.OSClientV3 osClientV3 = openStackApi.getAuthenticateUnscoped();
         HypervisorStatistics hypervisorStatistics =osClientV3.compute().hypervisors().statistics();
@@ -40,12 +40,28 @@ public class OpenStackService {
         jsonObject.setMemoryUsed(hypervisorStatistics.getMemoryUsed());
         jsonObject.setVirtualCpu(hypervisorStatistics.getVirtualCPU());
         jsonObject.setVirtualUsedCpu(hypervisorStatistics.getVirtualUsedCPU());
-
         //网络个数
-        Integer netWordCount = osClientV3.networking().network().list().size();
+        List<? extends Network> netList = osClientV3.networking().network().list();
+        Integer netWordCount = netList.size();
         jsonObject.setNetworkCount(netWordCount);
         jsonObject.setCreateTm(new Date());
-        return new AjaxResponse(jsonObject);
+        return jsonObject;
+    }
+
+    public AjaxResponse<BusOpenstackLogs> getInfo(){
+        BusOpenstackLogs busOpenstackLogs = getCountInfo();
+        OSClient.OSClientV3 osClientV3 = openStackApi.getAuthenticateUnscoped();
+        List<? extends Hypervisor> hostList = osClientV3.compute().hypervisors().list();
+        List vmList = osClientV3.compute().servers().list();
+        //网络个数
+        List<? extends Network> netList = osClientV3.networking().network().list();
+
+        Map<String,Object> infoMap = new LinkedHashMap<>();
+        infoMap.put("hostList",hostList);
+        infoMap.put("vmList",vmList);
+        infoMap.put("netList",netList);
+        busOpenstackLogs.setInfoMap(infoMap);
+        return new AjaxResponse(busOpenstackLogs);
     }
 
     public AjaxResponse<PageInfo<BusOpenstackLogs>> getInfoByPage(Integer page, Integer limit){

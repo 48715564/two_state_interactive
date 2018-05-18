@@ -2,6 +2,8 @@ package com.cn.domain.entity;
 
 import com.cn.common.persistence.BaseEntity;
 
+import java.util.Map;
+
 public class BusOpenstackLogs extends BaseEntity {
     private Integer hypervisorCount;
 
@@ -26,6 +28,8 @@ public class BusOpenstackLogs extends BaseEntity {
     private Integer virtualUsedCpu;
 
     private Integer networkCount;
+
+    private Map<String,Object> infoMap;
 
     public Integer getHypervisorCount() {
         return hypervisorCount;
@@ -121,5 +125,13 @@ public class BusOpenstackLogs extends BaseEntity {
 
     public void setNetworkCount(Integer networkCount) {
         this.networkCount = networkCount;
+    }
+
+    public Map<String, Object> getInfoMap() {
+        return infoMap;
+    }
+
+    public void setInfoMap(Map<String, Object> infoMap) {
+        this.infoMap = infoMap;
     }
 }

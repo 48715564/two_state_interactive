@@ -23,7 +23,7 @@ public class Job {
 //    @Scheduled(initialDelay = 3000, fixedRate = 10000)
     public void saveOpenStackInfo() {
         try {
-            BusOpenstackLogs busOpenstackLogs = openStackService.getInfo().getResult();
+            BusOpenstackLogs busOpenstackLogs = openStackService.getCountInfo();
             busOpenstackLogsService.save(busOpenstackLogs);
         }catch (Exception e) {
             logger.error("saveOpenStackInfo:"+e.getMessage());
