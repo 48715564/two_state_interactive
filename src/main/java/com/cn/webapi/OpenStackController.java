@@ -50,4 +50,29 @@ public class OpenStackController {
         }
     }
 
+    @ApiOperation(value = "根据主机ID获取host相关信息", notes = "根据主机ID获取host相关信息", position = 1)
+    @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
+    @GetMapping("/getHostById")
+    public AjaxResponse getHostById(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,
+                                                             @ApiParam(value = "hostID", required = true) @RequestParam("hostID") String hostID){
+        try {
+            return openStackService.getHostByID(hostID);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "根据虚拟机ID获取虚拟机相关信息", notes = "根据虚拟机ID获取虚拟机相关信息", position = 1)
+    @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
+    @GetMapping("/getVMById")
+    public AjaxResponse getVMById(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,
+                                    @ApiParam(value = "VMID", required = true) @RequestParam("VMID") String VMID){
+        try {
+            return openStackService.getVMByID(VMID);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
