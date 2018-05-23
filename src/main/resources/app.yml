@@ -1,0 +1,12 @@
+version: '2'
+services:
+    cmp-api-openstack:
+        image: cmp-api-openstack
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod,swagger
+            - SPRING_DATASOURCE_URL=jdbc:mysql://cmp-api-openstack-mysql:3306/monitor?useUnicode=true&characterEncoding=utf8&useSSL=false
+            - admin_password=123456
+    cmp-api-openstack-mysql:
+        extends:
+            file: mysql.yml
+            service: cmp-api-openstack-mysql
