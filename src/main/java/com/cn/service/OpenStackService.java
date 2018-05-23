@@ -11,6 +11,7 @@ import org.openstack4j.model.compute.Server;
 import org.openstack4j.model.compute.ext.Hypervisor;
 import org.openstack4j.model.compute.ext.HypervisorStatistics;
 import org.openstack4j.model.network.Network;
+import org.openstack4j.model.network.options.PortListOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,14 +53,23 @@ public class OpenStackService {
     public AjaxResponse<BusOpenstackLogs> getInfo(){
         BusOpenstackLogs busOpenstackLogs = getCountInfo();
         OSClient.OSClientV3 osClientV3 = openStackApi.getAuthenticateUnscoped();
+        List imagesList = osClientV3.imagesV2().list();
+        busOpenstackLogs.setImagesCount(imagesList.size());
+        List flavorsList = osClientV3.compute().flavors().list();
+        busOpenstackLogs.setFlavorsCount(flavorsList.size());
+        List volumeList = osClientV3.blockStorage().volumes().list();
+        busOpenstackLogs.setVolumeCount(volumeList.size());
         List<? extends Hypervisor> hostList = osClientV3.compute().hypervisors().list();
         List vmList = osClientV3.compute().servers().list();
         //网络个数
         List<? extends Network> netList = osClientV3.networking().network().list();
         Map<String,Object> infoMap = new LinkedHashMap<>();
+        infoMap.put("imagesList",imagesList);
         infoMap.put("hostList",hostList);
         infoMap.put("vmList",vmList);
         infoMap.put("netList",netList);
+        infoMap.put("flavorsList",flavorsList);
+        infoMap.put("volumeList",volumeList);
         busOpenstackLogs.setInfoMap(infoMap);
         return new AjaxResponse(busOpenstackLogs);
     }
@@ -70,6 +80,21 @@ public class OpenStackService {
         Map map = new LinkedHashMap();
         map.put("type","host");
         map.put("item",hypervisor);
+        ajaxResponse.setResult(map);
+        return ajaxResponse;
+    }
+
+    public AjaxResponse getNetworkByID(String networkID) {
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        OSClient.OSClientV3 osClientV3 = openStackApi.getAuthenticateUnscoped();
+        Network network = osClientV3.networking().network().get(networkID);
+        List portList = osClientV3.networking().port().list(PortListOptions.create().networkId(networkID));
+        Map map = new LinkedHashMap();
+        map.put("type","network");
+        Map itemMap = new LinkedHashMap();
+        itemMap.put("network",network);
+        itemMap.put("portList",portList);
+        map.put("item",itemMap);
         ajaxResponse.setResult(map);
         return ajaxResponse;
     }

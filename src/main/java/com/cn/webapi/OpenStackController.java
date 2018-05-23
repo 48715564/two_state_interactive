@@ -75,4 +75,17 @@ public class OpenStackController {
             throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @ApiOperation(value = "根据网络ID获取网络的相关信息", notes = "根据网络ID获取网络相关信息", position = 1)
+    @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
+    @GetMapping("/getNetworkById")
+    public AjaxResponse getNetworkById(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,
+                                  @ApiParam(value = "VMID", required = true) @RequestParam("networkID") String networkID){
+        try {
+            return openStackService.getNetworkByID(networkID);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

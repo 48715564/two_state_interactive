@@ -1,7 +1,6 @@
 package com.cn.domain.entity;
 
 import com.cn.common.persistence.BaseEntity;
-
 import java.util.Map;
 
 public class BusOpenstackLogs extends BaseEntity {
@@ -28,6 +27,12 @@ public class BusOpenstackLogs extends BaseEntity {
     private Integer virtualUsedCpu;
 
     private Integer networkCount;
+
+    private Integer volumeCount;
+
+    private Integer imagesCount;
+
+    private Integer flavorsCount;
 
     private Map<String,Object> infoMap;
 
@@ -133,5 +138,29 @@ public class BusOpenstackLogs extends BaseEntity {
 
     public void setInfoMap(Map<String, Object> infoMap) {
         this.infoMap = infoMap;
+    }
+
+    public Integer getImagesCount() {
+        return imagesCount;
+    }
+
+    public void setImagesCount(Integer imagesCount) {
+        this.imagesCount = imagesCount;
+    }
+
+    public Integer getFlavorsCount() {
+        return flavorsCount;
+    }
+
+    public void setFlavorsCount(Integer flavorsCount) {
+        this.flavorsCount = flavorsCount;
+    }
+
+    public Integer getVolumeCount() {
+        return volumeCount;
+    }
+
+    public void setVolumeCount(Integer volumeCount) {
+        this.volumeCount = volumeCount;
     }
 }
