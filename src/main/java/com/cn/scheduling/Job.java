@@ -19,8 +19,8 @@ public class Job {
     private OpenStackService openStackService;
 
     //定时查询openstack信息保存到数据库
-    @Scheduled(cron = "0 0 1 * * *")
-//    @Scheduled(initialDelay = 3000, fixedRate = 10000)
+//    @Scheduled(cron = "0 0 1 * * *")
+    @Scheduled(initialDelay = 3000, fixedRate = 5*60*1000)
     public void saveOpenStackInfo() {
         try {
             BusOpenstackLogs busOpenstackLogs = openStackService.getCountInfo();

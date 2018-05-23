@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 系统登陆注册
  * Created by zhoubo on 2016/12/1.
@@ -39,11 +41,9 @@ public class OpenStackController {
     @ApiOperation(value = "获取openstack相关信息", notes = "获取openstack相关信息,提供翻页查询，按照时间倒叙", position = 1)
     @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
     @GetMapping("/infoPage")
-    public AjaxResponse<PageInfo<BusOpenstackLogs>> infoPage(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,
-                                                             @ApiParam(value = "页码", required = true) @RequestParam("page") Integer page,
-                                                             @ApiParam(value = "每页条数", required = true) @RequestParam("limit") Integer limit){
+    public AjaxResponse<List<BusOpenstackLogs>> infoPage(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token){
         try {
-            return openStackService.getInfoByPage(page, limit);
+            return openStackService.getInfoByPage();
         }catch (Exception e){
             logger.error(e.getMessage());
             throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
@@ -80,9 +80,35 @@ public class OpenStackController {
     @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
     @GetMapping("/getNetworkById")
     public AjaxResponse getNetworkById(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,
-                                  @ApiParam(value = "VMID", required = true) @RequestParam("networkID") String networkID){
+                                  @ApiParam(value = "networkID", required = true) @RequestParam("networkID") String networkID){
         try {
             return openStackService.getNetworkByID(networkID);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "根据镜像ID获取镜像的相关信息", notes = "根据镜像ID获取镜像相关信息", position = 1)
+    @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
+    @GetMapping("/getImagesByID")
+    public AjaxResponse getImagesByID(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,
+                                           @ApiParam(value = "imagesID", required = true) @RequestParam("imagesID") String imagesID){
+        try {
+            return openStackService.getImagesByID(imagesID);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "根据实例类型ID获取实例类型的相关信息", notes = "根据实例类型ID获取实例类型相关信息", position = 1)
+    @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
+    @GetMapping("/getFlavorsByID")
+    public AjaxResponse getFlavorsByID(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token,
+                                      @ApiParam(value = "flavorsID", required = true) @RequestParam("flavorsID") String flavorsID){
+        try {
+            return openStackService.getFlavorsByID(flavorsID);
         }catch (Exception e){
             logger.error(e.getMessage());
             throw new ResponseException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);

@@ -40,6 +40,9 @@ CREATE TABLE `bus_openstack_logs` (
   `network_count` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `bus_openstack_logs`
+ADD INDEX `openstack_create_time_index` (`create_tm` DESC);
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
