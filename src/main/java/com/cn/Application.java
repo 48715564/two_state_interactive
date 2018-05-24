@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -24,12 +25,15 @@ import java.util.concurrent.Executors;
 @EnableAdminServer
 @EnableSwagger2
 @MapperScan("com.cn.domain.mapper")
-public class Application   implements SchedulingConfigurer {
-    @Bean(destroyMethod = "shutdown")
+public class Application implements SchedulingConfigurer {
+    @Bean
     public Executor taskExecutor() {
-        return Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors());
+        return executor;
     }
 
+    @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
         taskRegistrar.setScheduler(taskExecutor());
     }
