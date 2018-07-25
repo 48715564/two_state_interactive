@@ -48,8 +48,8 @@ public class XClarityService{
             ram.put("Maximum",NumberUtil.round(NumberUtil.div(MemTotal,kbToGb).doubleValue(),2));
 
             JSONObject hdd = new JSONObject();
-            BigDecimal sda1PartitionTotal= tempData.getBigDecimal("sda1PartitionTotal");
-            BigDecimal sda1PartitionAvailable = tempData.getBigDecimal("sda1PartitionAvailable");
+            BigDecimal sda1PartitionTotal= tempData.getBigDecimal("sda3PartitionTotal");
+            BigDecimal sda1PartitionAvailable = tempData.getBigDecimal("sda3PartitionAvailable");
             hdd.put("Resource","hdd");
             hdd.put("Utilization",NumberUtil.div(NumberUtil.mul(NumberUtil.sub(sda1PartitionTotal,sda1PartitionAvailable),100),sda1PartitionTotal).intValue());
             hdd.put("FlatUtil",NumberUtil.round(NumberUtil.div(NumberUtil.sub(sda1PartitionTotal,sda1PartitionAvailable),kbToGb).doubleValue(),2));
