@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * vmware首页API
- * Created by zhoubo on 2016/12/1.
+ * Created by zhoubo on 2017/12/1.
  */
 @Api(value = "vmware", description = "vmware首页API", position = 1)
 @RestController
