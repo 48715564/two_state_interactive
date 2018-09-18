@@ -130,18 +130,6 @@
             <artifactId>hutool-all</artifactId>
             <version>3.2.0</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.vmware.ssoclient</groupId>
-            <artifactId>ssoclient</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.vmware.vim25</groupId>
-            <artifactId>vim25</artifactId>
-            <version>1.0.0</version>
-        </dependency>
     </dependencies>
 
 
