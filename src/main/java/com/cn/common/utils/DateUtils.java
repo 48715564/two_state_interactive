@@ -2,6 +2,7 @@ package com.cn.common.utils;
 
 import com.xiaoleilu.hutool.date.DateUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,6 +12,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 public class DateUtils {
+
+    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
       
     /** 
      * 将Date类转换为XMLGregorianCalendar 
@@ -64,7 +67,11 @@ public class DateUtils {
         }
         return dateList;
     }
+
+    public static String getTime(long time){
+        return simpleDateFormat.format(new Date(time));
+    }
     public static void main(String[] args) {
-        System.out.println(new Date());
+        System.out.println(getTime(1537933230000L));
     }
 }
