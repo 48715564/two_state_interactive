@@ -55,7 +55,7 @@ public class OvirtController {
     @ApiOperation(value = "监控磁盘IOPS信息", notes = "监控磁盘IOPS信息", position = 1)
     @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
     @GetMapping("/monitorStoreIOPSData")
-    public Map<String, List<String>> monitorStoreIOPSData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token){
+    public AjaxResponse<Map<String, List<String>>> monitorStoreIOPSData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token){
         try {
             return ovirtService.monitorStoreIOPSData();
         }catch (Exception e){

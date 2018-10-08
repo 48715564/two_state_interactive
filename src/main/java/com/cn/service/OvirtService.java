@@ -342,7 +342,7 @@ public class OvirtService {
         return new AjaxResponse<>(map);
     }
 
-    public Map<String, List<String>> monitorStoreIOPSData() {
+    public AjaxResponse<Map<String, List<String>>> monitorStoreIOPSData() {
         Map<String, JSONArray> iopsData = getStoreIOPS();
         List<String> timeList = new ArrayList<>();
         List<String> readData = new ArrayList<>();
@@ -362,6 +362,6 @@ public class OvirtService {
         dataList.put("timeData",timeList);
         dataList.put("readData",readData);
         dataList.put("writeDate",writeDate);
-        return dataList;
+        return new AjaxResponse<>(dataList);
     }
 }
