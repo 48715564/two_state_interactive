@@ -100,14 +100,34 @@ public class OvirtService {
      *
      * @return
      */
-    private Map<String, JSONArray> getStoreIOPS() {
+    private Map<String, JSONArray> getStorageBandWidth() {
         Map<String, JSONArray> map = new LinkedHashMap<>();
         JSONArray jsonArrayWrite = new JSONArray();
         JSONArray jsonArrayRead = new JSONArray();
-        JSONObject jsonObject = sSanApi.getStorageIOPS();
+        JSONObject jsonObject = sSanApi.getStorageBandWidth();
         if (jsonObject != null) {
-            jsonArrayWrite = changeJsonArrayNull(jsonObject.getJSONArray("iops_write"));
-            jsonArrayRead = changeJsonArrayNull(jsonObject.getJSONArray("iops_read"));
+            jsonArrayWrite = changeJsonArrayNull(jsonObject.getJSONArray("bandwidth_write"));
+            jsonArrayRead = changeJsonArrayNull(jsonObject.getJSONArray("bandwidth_read"));
+
+        }
+        map.put("write", jsonArrayWrite);
+        map.put("read", jsonArrayRead);
+        return map;
+    }
+
+    /**
+     * 获取存储十分钟最新的iops信息
+     *
+     * @return
+     */
+    private Map<String, JSONArray> getNowStorageBandWidth() {
+        Map<String, JSONArray> map = new LinkedHashMap<>();
+        JSONArray jsonArrayWrite = new JSONArray();
+        JSONArray jsonArrayRead = new JSONArray();
+        JSONObject jsonObject = sSanApi.getNowStorageBandWidth();
+        if (jsonObject != null) {
+            jsonArrayWrite = changeJsonArrayNull(jsonObject.getJSONArray("bandwidth_write"));
+            jsonArrayRead = changeJsonArrayNull(jsonObject.getJSONArray("bandwidth_read"));
 
         }
         map.put("write", jsonArrayWrite);
@@ -343,7 +363,7 @@ public class OvirtService {
     }
 
     public AjaxResponse<Map<String, List<String>>> monitorStoreIOPSData() {
-        Map<String, JSONArray> iopsData = getStoreIOPS();
+        Map<String, JSONArray> iopsData = getStorageBandWidth();
         List<String> timeList = new ArrayList<>();
         List<String> readData = new ArrayList<>();
         List<String> writeDate = new ArrayList<>();
@@ -362,6 +382,32 @@ public class OvirtService {
         dataList.put("timeData",timeList);
         dataList.put("readData",readData);
         dataList.put("writeDate",writeDate);
+        return new AjaxResponse<>(dataList);
+    }
+
+
+    public AjaxResponse<Map<String, String>> monitorNowStoreIOPSData() {
+        Map<String, JSONArray> iopsData = getNowStorageBandWidth();
+        List<String> timeList = new ArrayList<>();
+        List<String> readData = new ArrayList<>();
+        List<String> writeDate = new ArrayList<>();
+        JSONArray readJsonArray = iopsData.get("read");
+        JSONArray writeJsonArray = iopsData.get("write");
+        for(int i = 0;i<readJsonArray.size();i++){
+            JSONObject jsonObject = readJsonArray.getJSONObject(i);
+            timeList.add(DateUtils.getTime(jsonObject.getLong("time")));
+            readData.add(jsonObject.getStr("value"));
+        }
+        for(int i = 0;i<writeJsonArray.size();i++){
+            JSONObject jsonObject = writeJsonArray.getJSONObject(i);
+            writeDate.add(jsonObject.getStr("value"));
+        }
+        Map<String,String> dataList = new LinkedHashMap<>();
+        if(timeList.size()>0&&readData.size()>0&&writeDate.size()>0){
+            dataList.put("timeData",timeList.get(0));
+            dataList.put("readData",readData.get(0));
+            dataList.put("writeDate",writeDate.get(0));
+        }
         return new AjaxResponse<>(dataList);
     }
 }

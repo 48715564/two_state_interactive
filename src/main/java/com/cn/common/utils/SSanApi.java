@@ -11,7 +11,8 @@ import org.springframework.web.client.RestTemplate;
 public class SSanApi {
     private static final String storage = "/api/monitors/clusters/ssan/storage/?format=json";
     private static final String storageIOPS = "/api/monitors/clusters/ssan/iops/10/i/?format=json";
-
+    private static final String storageBandWidth = "/api/monitors/clusters/ssan/bandwidth/10/i/?format=json";
+    private static final String nowStorageBandWidth = "/api/monitors/clusters/ssan/bandwidth/10/a/?format=json";
     @Value("${ssan.url}")
     private String ssanUrl;
     @Autowired
@@ -53,6 +54,24 @@ public class SSanApi {
      */
     public JSONObject getStorageIOPS() {
         return sendGet(getRequestUrl(storageIOPS));
+    }
+
+    /**
+     * 获取10分钟以内的存储流量
+     *
+     * @return
+     */
+    public JSONObject getStorageBandWidth() {
+        return sendGet(getRequestUrl(storageBandWidth));
+    }
+
+    /**
+     * 获取10分钟最新的存储流量
+     *
+     * @return
+     */
+    public JSONObject getNowStorageBandWidth(){
+        return sendGet(getRequestUrl(nowStorageBandWidth));
     }
 
 }

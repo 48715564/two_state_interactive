@@ -65,4 +65,17 @@ public class OvirtController {
         }
     }
 
+    @ApiOperation(value = "监控磁盘最新的带宽信息", notes = "监控磁盘最新的带宽信息", position = 1)
+    @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
+    @GetMapping("/monitorNowStoreIOPSData")
+    public AjaxResponse<Map<String, String>> monitorNowStoreIOPSData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token){
+        try {
+            return ovirtService.monitorNowStoreIOPSData();
+        }catch (Exception e){
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            throw new ResponseException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
