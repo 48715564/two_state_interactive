@@ -362,7 +362,7 @@ public class OvirtService {
         return new AjaxResponse<>(map);
     }
 
-    public AjaxResponse<Map<String, List<String>>> monitorStoreIOPSData() {
+    public AjaxResponse<Map<String, List<String>>> monitorStoreBandWidthData() {
         Map<String, JSONArray> iopsData = getStorageBandWidth();
         List<String> timeList = new ArrayList<>();
         List<String> readData = new ArrayList<>();

@@ -54,10 +54,10 @@ public class OvirtController {
 
     @ApiOperation(value = "监控磁盘IOPS信息", notes = "监控磁盘IOPS信息", position = 1)
     @ApiResponses({@ApiResponse(code = 200, message = "运行结果")})
-    @GetMapping("/monitorStoreIOPSData")
-    public AjaxResponse<Map<String, List<String>>> monitorStoreIOPSData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token){
+    @GetMapping("/monitorStoreBandWidthData")
+    public AjaxResponse<Map<String, List<String>>> monitorStoreBandWidthData(@ApiParam(value = "用户token", required = true) @RequestHeader("token") String token){
         try {
-            return ovirtService.monitorStoreIOPSData();
+            return ovirtService.monitorStoreBandWidthData();
         }catch (Exception e){
             e.printStackTrace();
             logger.error(e.getMessage());
