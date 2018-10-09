@@ -142,41 +142,6 @@
                     <mainClass>com.cn.Application</mainClass>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.3.1</version>
-                <executions>
-                    <execution>
-                        <id>install-ssoclient</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <packaging>jar</packaging>
-                            <groupId>com.vmware.ssoclient</groupId>
-                            <artifactId>ssoclient</artifactId>
-                            <version>1.0.0</version>
-                            <file>lib/ssoclient-1.0.0.jar</file>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-vim25</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <packaging>jar</packaging>
-                            <groupId>com.vmware.vim25</groupId>
-                            <artifactId>vim25</artifactId>
-                            <version>1.0.0</version>
-                            <file>lib/vim25-1.0.0.jar</file>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
