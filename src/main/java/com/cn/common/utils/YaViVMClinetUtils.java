@@ -1,7 +1,6 @@
 package com.cn.common.utils;
 
 import com.cn.common.infrastructure.Constant;
-import com.google.common.collect.Lists;
 import com.vmware.vim25.*;
 import com.vmware.vim25.mo.*;
 import com.xiaoleilu.hutool.date.DateUtil;
@@ -25,8 +24,7 @@ public class YaViVMClinetUtils {
      */
     public void connect() {
         try {
-            si = new ServiceInstance(new URL("https://10.0.7.45/sdk"), "administrator@daocloud.io", "Admin@123", true);
-//            si = new ServiceInstance(new URL(url), userName, password, true);
+            si = new ServiceInstance(new URL(url), userName, password, true);
         } catch (SOAPFaultException sfe) {
             sfe.printStackTrace();
         } catch (Exception e) {
@@ -130,6 +128,26 @@ public class YaViVMClinetUtils {
         return getManagedEntityByName("HostSystem", hostName);
     }
 
+    public ManagedEntity getVMByName(String vmName) throws RemoteException {
+        return getManagedEntityByName("VirtualMachine", vmName);
+    }
+
+    public ManagedEntity getDataCenterByName(String dataCenterName) throws RemoteException {
+        return getManagedEntityByName("Datacenter", dataCenterName);
+    }
+
+    public ManagedEntity getClusterByName(String clusterName) throws RemoteException {
+        return getManagedEntityByName("ClusterComputeResource", clusterName);
+    }
+
+    public ManagedEntity getDatastoreByName(String dsName) throws RemoteException {
+        return getManagedEntityByName("Datastore", dsName);
+    }
+
+    public ManagedEntity getNetworkByName(String networkName) throws RemoteException {
+        return getManagedEntityByName("Network", networkName);
+    }
+
     public Map<String, Object> getMonitorAllData(ManagedEntity mo, int interval) throws RemoteException {
         Map<String, Object> map = new LinkedHashMap<>();
         if (mo != null) {
@@ -152,6 +170,46 @@ public class YaViVMClinetUtils {
             qSpec.setEntity(mo.getMOR());
             qSpec.setMetricId(listpermeid);
             qSpec.setIntervalId(interval);
+//            qSpec.setFormat("normal");
+            PerfQuerySpec[] arryQuery = {qSpec};
+            PerfEntityMetricBase[] pValues = performanceManager.queryPerf(arryQuery);
+            if(pValues!=null&&counters!=null) {
+                List<PerfEntityMetricBase> listpemb = Arrays.asList(pValues);
+                map.put("counters", counters);
+                map.put("listpemb", listpemb);
+            }
+        }
+        return map;
+    }
+
+    public Map<String, Object> getMonitorAllData(ManagedEntity mo, int interval,Date sTime,Date eTime) throws RemoteException {
+        Map<String, Object> map = new LinkedHashMap<>();
+        if (mo != null) {
+            Calendar calBegin = Calendar.getInstance();
+            calBegin.setTime(sTime);
+            Calendar calEnd = Calendar.getInstance();
+            calEnd.setTime(eTime);
+            PerformanceManager performanceManager = si.getPerformanceManager();
+            PerfCounterInfo[] cInfo = performanceManager.getPerfCounter();
+            Map<Integer, PerfCounterInfo> counters = new HashMap<Integer, PerfCounterInfo>();
+            for (PerfCounterInfo pcInfo : cInfo) {
+                counters.put(new Integer(pcInfo.getKey()), pcInfo);
+            }
+            PerfMetricId[] listpermeid = performanceManager.queryAvailablePerfMetric(mo, null, null, interval);
+            ArrayList<PerfMetricId> mMetrics = new ArrayList<PerfMetricId>();
+            if (listpermeid != null) {
+                for (int index = 0; index < listpermeid.length; ++index) {
+                    if (counters.containsKey(new Integer(listpermeid[index].getCounterId()))) {
+                        mMetrics.add(listpermeid[index]);
+                    }
+                }
+            }
+            PerfQuerySpec qSpec = new PerfQuerySpec();
+            qSpec.setEntity(mo.getMOR());
+            qSpec.setMetricId(listpermeid);
+            qSpec.setIntervalId(interval);
+            qSpec.setStartTime(calBegin);
+            qSpec.setEndTime(calEnd);
 //            qSpec.setFormat("normal");
             PerfQuerySpec[] arryQuery = {qSpec};
             PerfEntityMetricBase[] pValues = performanceManager.queryPerf(arryQuery);

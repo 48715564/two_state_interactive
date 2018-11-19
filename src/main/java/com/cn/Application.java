@@ -1,12 +1,10 @@
 package com.cn;
 
 import de.codecentric.boot.admin.config.EnableAdminServer;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -23,7 +21,6 @@ import java.util.concurrent.Executors;
 @EnableScheduling
 @EnableAdminServer
 @EnableSwagger2
-@MapperScan("com.cn.domain.mapper")
 public class Application   implements SchedulingConfigurer {
     @Bean(destroyMethod = "shutdown")
     public Executor taskExecutor() {

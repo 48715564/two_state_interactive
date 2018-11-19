@@ -48,12 +48,12 @@ public class DateUtils {
     /**
      * 获得两个时间间的所有时间
      */
-    public static List<String> getAllDateStr(String startDateStr,String endDateStr,long count){
+    public static List<String> getAllDateStr(String startDateStr,String endDateStr,long count,int intervalTime){
         List<String> dateList = new ArrayList<>();
         Date startDate = DateUtil.parse(startDateStr,"yyyy-MM-dd HH:mm:ss");
         Date endDate = DateUtil.parse(endDateStr,"yyyy-MM-dd HH:mm:ss");
         //计算间隔时间
-        Integer interval = Math.toIntExact((endDate.getTime()+20000 - startDate.getTime()) / (1000 * count));
+        Integer interval = Math.toIntExact((endDate.getTime()+(intervalTime*1000) - startDate.getTime()) / (1000 * count));
         Date tempDate = startDate;
         dateList.add(DateUtil.format(startDate,"yyyy-MM-dd HH:mm:ss"));
         for(int i = 1;i<=count;i++) {
